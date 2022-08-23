@@ -76,14 +76,24 @@ def getUserInfoTemp(session):
 def getUserInfo(session):
     sql = "select * from user_info"
     result = session.execute(sql)
-    data = pd.DataFrame(result, columns=["user_code", "user_name", "sector", "address", "branch", "center", "voltage_level",
+    data = pd.DataFrame(result,
+                        columns=["user_code", "user_name", "sector", "address", "branch", "center", "voltage_level",
                                  "user_type", "district", "lon", "lat", "std_industry_name", "std_industry_id",
                                  "company_nature", "is_core", "key_industry_id"])
     return data
+
 
 @operateSqlData
 def getCompanyLibrary(session):
     sql = "select 企业名称 from kudata"
     result = session.execute(sql)
     data = pd.DataFrame(result, columns=["companyName"])
+    return data
+
+
+@operateSqlData
+def getCommercialInfo(session):
+    sql = "select user_name,core_industry from commercial_info_copy"
+    result = session.execute(sql)
+    data = pd.DataFrame(result, columns=["cuser_name", "core_industry"])
     return data
