@@ -1,24 +1,26 @@
 #!/usr/bin
 # encoding: utf-8
-"""=========================
-@author: Bruce
-@contact: wsq8932419@163.com
-@software: PyCharm
-@file: connect.py
-@time: 2020/7/21 10:43
-=============================="""
 
 from package.config import DBConfig
 import pymysql
 from sqlalchemy import create_engine
-import mysql.connector
+from sqlalchemy.orm import sessionmaker
+
+def getSqlData(func):
+    def wrapper():
+        engine = mysql_engine()
+        DBSession = sessionmaker(bind=engine)
+        session = DBSession()
+        func(session)
+        session.close()
+    return wrapper
 
 def mysql_engine():
     """
     创建sql_engine
     :return: engine
     """
-    engine = create_engine('mysql+mysqlconnector://'
+    engine = create_engine('mysql+pymysql://'
                            + DBConfig.user_mysql + ':'
                            + DBConfig.password_mysql + '@'
                            + DBConfig.host_mysql + ':'

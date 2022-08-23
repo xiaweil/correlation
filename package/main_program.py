@@ -44,7 +44,7 @@ def algorithm_dict():
     :return:
     """
     engine = mysql_engine()
-    df = pd.read_sql('select id,func_name from m_algorithm_details where deleted=0', con=engine)
+    df = pd.read_sql("select id,func_name from m_algorithm_details where deleted=0", con=engine)
     engine.dispose()
     dic = df.set_index('id').T.to_dict('records')
     return dic[0]
