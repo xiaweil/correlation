@@ -6,13 +6,14 @@ import pymysql
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-def getSqlData(func):
+def operateSqlData(func):
     def wrapper():
         engine = mysql_engine()
         DBSession = sessionmaker(bind=engine)
         session = DBSession()
-        func(session)
+        data = func(session)
         session.close()
+        return data
     return wrapper
 
 def mysql_engine():
