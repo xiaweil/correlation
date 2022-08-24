@@ -23,16 +23,23 @@ def generateInputData():
     dataEle.loc[~dataEle["userId"].isin(keyCompanyId), "isCoreCompany"] = 0
     print("是否重点企业拼接完成")
 
-
     # 获取division, industryClass, eleType指标
-    partUserInfoColumns = ["user_code", "user_name", "district", "user_type", "std_industry_name"]
+    partUserInfoColumns = ["user_code", "user_name", "district", "user_type", "std_industry_name", "key_industry_name"]
     partUserInfo = user_info.loc[:, partUserInfoColumns]
 
     # 获取keyIndustryClass指标
     # 获取工商信息
-    keyIndustryClass = psd.getCommercialInfo()
-    partV3Data = pd.merge(partUserInfo, keyIndustryClass, how="left", left_on="user_name", right_on="cuser_name")
-    v3InputData = pd.merge(dataEle, partV3Data, how="left", left_on="userId", right_on="user_code")
-    print(v3InputData.columns)
-
-generateInputData()
+    # keyIndustryClass = psd.getCommercialInfo()
+    # partV3Data = pd.merge(partUserInfo, keyIndustryClass, how="left", left_on="user_name", right_on="cuser_name")
+    v3InputData = pd.merge(dataEle, partUserInfo, how="left", left_on="userId", right_on="user_code")
+    v3InputData.rename(columns={"std_industry_name": "industryClass", "key_industry_name": "keyIndustryClass",
+                                "user_type": "eleType", "district": "division"}, inplace=True)
+    v3InputData.drop(columns=["user_code", "user_name"], axis=1, inplace=True)
+    columns = ['userId', 'month1', 'month2', 'month3', 'month4', 'month5', 'month6',
+               'month7', 'month8', 'month9', 'month10', 'month11', 'month12',
+               'month13', 'month14', 'month15', 'month16', 'month17', 'month18',
+               'month19', 'month20', 'month21', 'month22', 'month23', 'month24', 'sum',
+               'max', 'division', 'isCoreCompany', 'industryClass', 'eleType',
+               'period', 'mean', 'keyIndustryClass']
+    v3InputData = v3InputData.loc[:, columns]
+    return v3InputData

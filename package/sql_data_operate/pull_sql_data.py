@@ -33,7 +33,7 @@ def getval2017(session):
     sql = "select industry, electricity_per_output from energy_consumption where year =" \
           "(select distinct year from energy_consumption order by year desc limit 1,1);"
     result = session.execute(sql)
-    val2017 = pd.DataFrame(result, columns=["industry", "electricity_per_output2017"])
+    val2017 = pd.DataFrame(result, columns=["industry", "electricity_per_output_2017"])
     return val2017
 
 
@@ -55,16 +55,17 @@ def getMonthElectricity(session):
 def getUserInfoTemp(session):
     sql = "select a.consid user_code, a.consname user_name, tr.sector, a.elecaddr address, o.center, " \
           "vr.volt_level voltage_level, er.user_type, ci.district, ci.lon, ci.lat, " \
-          "tr.std_industry_name_e std_industry_name, tr.id std_industry_id, k.企业性质 company_nature, " \
+          "ci.std_industry_e std_industry_name, ii.id std_industry_id, k.企业性质 company_nature, " \
           "case when ci.core_industry != null then 1 else 0 end is_core," \
-          " ci.std_industry_e key_industry_name, ki.Id key_industry_id from cstconsumer_s_l0 a " \
+          "ci.core_industry key_industry_name, ki.Id key_industry_id from cstconsumer_s_l0 a " \
           "left join tradecode_ref tr on a.tradecode = tr.tradecode " \
           "left join electype_ref er on a.electypecode = er.electypecode " \
           "left join orgno_ref o on a.orgno = o.orgno " \
           "left join voltage_ref vr on a.voltcode = vr.voltcode " \
           "left join commercial_info_copy ci on a.consname = ci.user_name " \
           "left join kudata k on a.consname = k.企业名称 " \
-          "left join key_industry ki on core_industry = ki.industry_name"
+          "left join key_industry ki on core_industry = ki.industry_name " \
+          "left join industry_info ii on ci.std_industry_e = ii.std_industry_name"
     result = session.execute(sql)
     data = pd.DataFrame(result, columns=["user_code", "user_name", "sector", "address", "center", "voltage_level",
                                          "user_type", "district", "lon", "lat", "std_industry_name", "std_industry_id",
@@ -82,7 +83,7 @@ def getUserInfo(session):
                                  "company_nature", "is_core", "key_industry_id"])
     return data
 
-
+#获取企业库数据
 @operateSqlData
 def getCompanyLibrary(session):
     sql = "select 企业名称 from kudata"
@@ -90,10 +91,32 @@ def getCompanyLibrary(session):
     data = pd.DataFrame(result, columns=["companyName"])
     return data
 
-
+#获取工商信息
 @operateSqlData
 def getCommercialInfo(session):
     sql = "select user_name,core_industry from commercial_info_copy"
     result = session.execute(sql)
     data = pd.DataFrame(result, columns=["cuser_name", "core_industry"])
+    return data
+
+@operateSqlData
+def getIndustryLibrary(session):
+    sql = "select industryClass from industry where isUse=1"
+    result = session.execute(sql)
+    data = pd.DataFrame(result, columns=["industryClass"])
+    return data
+
+@operateSqlData
+def getTaskTimeRange(session):
+    sql = "select distinct date_sub(mr_date, interval 2 year) as start_time, mr_date as end_time from gdc_kie_deq_info_l0 " \
+          "order by mr_date desc limit 1"
+    result = session.execute(sql)
+    data = pd.DataFrame(result, columns=["start_time", "end_time"])
+    return data
+
+@operateSqlData
+def getIndustryMap(session):
+    sql = "select distinct std_industry_name, std_industry_id from user_info"
+    result = session.execute(sql)
+    data = pd.DataFrame(result, columns=["std_industry_name", "std_industry_id"])
     return data

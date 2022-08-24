@@ -18,7 +18,6 @@ def dealElectricity(data=psd.getMonthElectricity()):
     monthData["max"] = monthData.loc[:, __columnsEle].max(axis=1)
     # 筛选用电量为0的数据
     monthData = monthData[monthData["sum"] != 0]
-    print(monthData)
     # 滑动窗口筛选连续出现六个月的数据
     tempEle = monthData.loc[:, __columnsEle]
     tempEleBool = tempEle.applymap(lambda x: 1 if x > 0 else 0)
@@ -32,6 +31,7 @@ def dealElectricity(data=psd.getMonthElectricity()):
     monthData = pd.concat([monthData, period], axis=1)
     # 计算用电量均值
     monthData["mean"] = monthData["sum"] / monthData["period"]
+    print("电力数据拼接完成")
     return monthData
 
 
