@@ -1,0 +1,7 @@
+pandas
+numpy
+datetime
+scikit-learn
+factor_analyzer
+pymysql
+sqlalchemy

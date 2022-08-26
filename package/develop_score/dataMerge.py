@@ -2,7 +2,7 @@
 import pandas as pd
 from package.develop_score.zb_quantity_quality import finalMerge
 from package.develop_score.zb_growth_stability import calFunZb
-from package.develop_score.factorAnalysisApi import mainV2
+from package.develop_score.factorAnalysisApi import mainV2, mainVs
 from package.develop_score.scoreAdjust import adjustScore
 from package.data_preprocess import get_input_data as gid
 from package.sql_data_operate import pull_sql_data as psd
@@ -34,4 +34,57 @@ def getIndustrialScore():
                                        + afterAdjustScore["产业增速得分"] + afterAdjustScore["产业稳定性得分"])
     finalScore = pd.concat([scores.iloc[:, :2], afterAdjustScore], axis=1)
     print("获取分数结果完成")
+    return finalScore
+
+# 获取季度产业规模得分
+def getSeasonIndustrialScore():
+    # 输入
+    data = gid.generateSeasonInputData()
+    val2019 = psd.getval2019()
+    val2017 = psd.getval2017()
+    voltage = psd.getVoltageData()
+    industryLibrary = psd.getIndustryLibrary()
+    data = data[data["industryClass"].isin(list(industryLibrary["industryClass"]))]
+
+    result1 = finalMerge(data, voltage, val2019, val2017, 2)
+    columns = ["division", "industryClass", "electricity_sum_l3", "electricity_avg_l3", "electricity_max_l3",
+               "electricity_sum_max_l3", "output_sum_l3", "output_proportion_l3", "enterprise_sum_l3",
+               "enterprise_proportion_l3", "proportion_district_l3", "proportion_industry_l3"]
+    result = result1[columns]
+
+    # FA计算得分
+    print("开始因子分析")
+    scores = mainVs(result)
+    # 调整分数并计算综合得分
+    print("因子分析完成")
+    afterAdjustScore = adjustScore(scores.iloc[:, 2:])
+    afterAdjustScore.columns = ["季度产业规模得分"]
+    finalScore = pd.concat([scores.iloc[:, :2], afterAdjustScore], axis=1)
+    return finalScore
+
+
+# 获取年度产业规模得分
+def getYearIndustrialScore():
+    # 输入
+    data = gid.generateYearInputData()
+    val2019 = psd.getval2019()
+    val2017 = psd.getval2017()
+    voltage = psd.getVoltageData()
+    industryLibrary = psd.getIndustryLibrary()
+    data = data[data["industryClass"].isin(list(industryLibrary["industryClass"]))]
+
+    result1 = finalMerge(data, voltage, val2019, val2017, 3)
+    columns = ["division", "industryClass", "electricity_sum_l3", "electricity_avg_l3", "electricity_max_l3",
+               "electricity_sum_max_l3", "output_sum_l3", "output_proportion_l3", "enterprise_sum_l3",
+               "enterprise_proportion_l3", "proportion_district_l3", "proportion_industry_l3"]
+    result = result1[columns]
+
+    # FA计算得分
+    print("开始因子分析")
+    scores = mainVs(result)
+    # 调整分数并计算综合得分
+    print("因子分析完成")
+    afterAdjustScore = adjustScore(scores.iloc[:, 2:])
+    afterAdjustScore.columns = ["年度产业规模得分"]
+    finalScore = pd.concat([scores.iloc[:, :2], afterAdjustScore], axis=1)
     return finalScore

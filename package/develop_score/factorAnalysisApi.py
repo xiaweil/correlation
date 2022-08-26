@@ -71,3 +71,13 @@ def mainV2(data):
         result = __checkModel(nodeData)
         results = pd.concat([results, result], axis=1)
     return results
+
+def mainVs(data):
+    node = [2, 12]
+    results = data.iloc[:, 0:2]
+    for i in range(len(node) - 1):
+        print(f"加载季节第{i + 1}节点数据完成")
+        nodeData = data.iloc[:, node[i]:node[i + 1]]
+        result = __checkModel(nodeData)
+        results = pd.concat([results, result], axis=1)
+    return results

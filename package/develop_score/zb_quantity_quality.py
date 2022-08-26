@@ -194,6 +194,8 @@ def finalMerge(data, voltage, val2019, val2017, choice=1):
         columns = [f"month{i}" for i in range(1, 25)]
     elif choice == 2:
         columns = [f"season{i}" for i in range(1, 4)]
+    elif choice == 3:
+        columns = [f"year{i}" for i in range(1,13)]
     industryScale = calIndustryScaleData(data=data, columns=columns)
     developQuality = __dealVoltage(data, voltage, val2019, val2017)
     results = pd.concat([industryScale, developQuality], axis=1)
