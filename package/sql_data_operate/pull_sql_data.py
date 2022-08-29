@@ -99,11 +99,9 @@ def getUserInfoTemp(session):
 def getUserInfo(session):
     sql = "select * from user_info"
     result = session.execute(sql)
-    data = pd.DataFrame(result,
-                        columns=["id", "user_code", "user_name", "sector", "address", "branch", "center",
-                                 "voltage_level",
-                                 "user_type", "district", "lon", "lat", "std_industry_name", "std_industry_id",
-                                 "company_nature", "is_core", "key_industry_id"])
+    data = pd.DataFrame(result, columns=["id", "user_code", "user_name", "sector", "address", "branch", "center",
+                               "voltage_level", "user_type", "district", "lon", "lat", "std_industry_name",
+                               "std_industry_id", "company_nature", "is_core", "key_industry_id"])
     return data
 
 

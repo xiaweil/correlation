@@ -9,6 +9,7 @@
 =============================="""
 import os
 import sys
+
 # BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 # print(BASE_DIR)
 # sys.path.append(BASE_DIR)
@@ -36,7 +37,9 @@ from package.data_preprocess.credential import read_stat_data, read_credential_d
 from package.db_connect.connect import mysql_engine
 
 import warnings
+
 warnings.filterwarnings("ignore", category=DeprecationWarning)
+
 
 def algorithm_dict():
     """
@@ -48,6 +51,7 @@ def algorithm_dict():
     engine.dispose()
     dic = df.set_index('id').T.to_dict('records')
     return dic[0]
+
 
 def model_dict():
     """
@@ -95,10 +99,11 @@ def main_program(task_id, algorithm_or_model, algorithm_or_model_id):
     # else:
     #     df, data ,summary_vec = read_cnn_data(task_id)
     #     globals()[model_dicts.get(algorithm_or_model_id)](df, data, summary_vec, task_id)
-    #获取表名
-    #从m_analysis_task里面根据task_id找表名
+    # 获取表名
+    # 从m_analysis_task里面根据task_id找表名
     engine = mysql_engine()
-    task_data = pd.read_sql("select datasource_name from m_analysis_task where id = {}".format(task_id),con=engine)['datasource_name'][0]
+    task_data = pd.read_sql("select datasource_name from m_analysis_task where id = {}".format(task_id), con=engine)[
+        'datasource_name'][0]
     engine.dispose()
     ## 修改读表逻辑
     if algorithm_or_model == 'algorithm':
@@ -107,15 +112,16 @@ def main_program(task_id, algorithm_or_model, algorithm_or_model_id):
             df, train_data = read_credential_data(task_id)
             globals()[algorithm_dicts.get(algorithm_or_model_id)](df, train_data, task_id, param_dicts)
         else:
-            df = read_stat_data(task_id,task_data)
-            globals()[algorithm_dicts.get(algorithm_or_model_id)](df, task_id, param_dicts,task_data)
+            df = read_stat_data(task_id, task_data)
+            globals()[algorithm_dicts.get(algorithm_or_model_id)](df, task_id, param_dicts, task_data)
     else:
-        df, data ,summary_vec = read_cnn_data(task_id)
+        df, data, summary_vec = read_cnn_data(task_id)
         globals()[model_dicts.get(algorithm_or_model_id)](df, data, summary_vec, task_id)
     print("OK!")
 
+
 if __name__ == '__main__':
-    #main_program(1007, 'algorithm', 12)
+    # main_program(1007, 'algorithm', 12)
     main_program(1012, 'algorithm', 12)
     # main_program(146, 'm_analysis_private_enterprise', 'algorithm', 15)
     # main_program(714, 'm_analysis_data_overload', 'algorithm', 13)

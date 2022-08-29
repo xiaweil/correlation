@@ -13,7 +13,6 @@ import sys
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 print(BASE_DIR)
 sys.path.append(BASE_DIR)
-# sys.path.append("/root/intelligent_audit")
 
 import tornado.web
 import tornado.ioloop
@@ -21,9 +20,8 @@ import tornado.httpserver
 import tornado.options
 from tornado.options import options, define
 from tornado.web import RequestHandler
-from package.main_program import main_program
-from package.db_connect.update import update_error
-from package.emotion_analysis import emotion_analysis
+from package.sql_data_operate import push_sql_data as pusd
+
 
 define("port", default=8002, type=int, help="run server on the given port.")
 
@@ -34,34 +32,27 @@ class IndexHandler(RequestHandler):
 
         self.write("**开始执行分析任务**\n")
         # 获取参数
-        task_id = int(self.get_body_argument('task_id'))
-        #task_data = self.get_body_argument('task_data')
-        algorithm_or_model = self.get_body_argument('algorithm_or_model')
-        algorithm_or_model_id = int(self.get_body_argument('algorithm_or_model_id'))
+        pusd.pushIndustrialScore()
+        self.write("任务完成")
 
-        # 执行主程序
-        try:
-            main_program(task_id,algorithm_or_model, algorithm_or_model_id)
-            self.write("**分析任务执行完成**")
-            #print('mmmm')
-        except Exception as e:
-            info = str(e)
-            update_error(task_id, info)
-            self.write(info)
-
-
-class EmotionAnalysis(RequestHandler):
-    """
-    综合评价权重应用
-    """
-    # 定义post方法
+class getSeasonScoreHandler(RequestHandler):
     def post(self):
-        # 获取参数
-        l2_id = int(self.get_body_argument('l2_id'))
-        file_pwd = self.get_body_argument('file_pwd')
-        # 执行主程序
-        info = emotion_analysis(l2_id, file_pwd)
-        self.write(info)
+        self.write("**开始执行分析任务**\n")
+        pusd.pushIndustryTrend()
+        self.write("任务完成")
+
+# class EmotionAnalysis(RequestHandler):
+#     """
+#     综合评价权重应用
+#     """
+#     # 定义post方法
+#     def post(self):
+#         # 获取参数
+#         l2_id = int(self.get_body_argument('l2_id'))
+#         file_pwd = self.get_body_argument('file_pwd')
+#         # 执行主程序
+#         info = emotion_analysis(l2_id, file_pwd)
+#         self.write(info)
 
 if __name__ == '__main__':
     # 从配置文件导入参数
@@ -72,8 +63,8 @@ if __name__ == '__main__':
 
     # 建立应用接口
     app = tornado.web.Application([
-        (r"/abnormal_detection", IndexHandler)
-        ,(r"/emotion_analysis", EmotionAnalysis),
+        (r"/industrial_score", IndexHandler),
+        (r"/seasonal_score", getSeasonScoreHandler)
     ])
 
     # 实例化httpserver

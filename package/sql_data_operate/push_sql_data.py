@@ -29,7 +29,7 @@ def pushCreativityData():
     data.to_sql("creativity_type", con=connect.mysql_engine(), if_exists="append", index=False)
 
 # pushUserInfo()
-pushIndustrialScore()
+# pushIndustrialScore()
 # pushYearIndustryTrend()
 
 # pushCreativityData()
