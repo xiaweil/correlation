@@ -18,7 +18,7 @@ def generateInputData():
     user = pd.merge(keyCompany, user_info, how="left", left_on="companyName", right_on="user_name")
     keyCompanyId = user.loc[:, "user_code"]
     keyCompanyId = list(keyCompanyId)
-    print(keyCompanyId)
+    # print(keyCompanyId)
 
     dataEle.loc[dataEle["userId"].isin(keyCompanyId), "isCoreCompany"] = 1
     dataEle.loc[~dataEle["userId"].isin(keyCompanyId), "isCoreCompany"] = 0
