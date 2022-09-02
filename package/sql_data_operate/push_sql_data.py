@@ -9,6 +9,7 @@ from package.db_connect.connect import operateSqlData
 from package.db_connect.base import User
 from math import isnan
 
+
 # 保存userInfo到数据库
 @operateSqlData
 def pushUserInfo(session):
@@ -29,7 +30,6 @@ def pushUserInfo(session):
             continue
         res.iloc[i, -1] = 1
 
-
         """
         # sql = f"update user_info set user_name = \"{res.iloc[i, 1]}\", sector =\"{res.iloc[i, 2]}\", address=\"{res.iloc[i, 3]}\"," \
         #       f"branch=\"{res.iloc[i, 4]}\", center = \"{res.iloc[i, 5]}\", voltage_level=\"{res.iloc[i, 6]}\", user_type=\"{res.iloc[i, 7]}\", " \
@@ -40,39 +40,86 @@ def pushUserInfo(session):
         """
 
         user_info = session.query(User).filter(User.user_code == res.iloc[i, 0]).first()
-        # if isnan(res.iloc[i, 1]) == False:
-        user_info.user_name = res.iloc[i, 1]
-        # if isnan(res.iloc[i, 2]) == False:
-        user_info.sector = res.iloc[i, 2]
-        # if isnan(res.iloc[i, 3]) == False:
-        user_info.address = res.iloc[i, 3]
-        # if isnan(res.iloc[i, 4]) == False:
-        user_info.branch = res.iloc[i, 4]
-        # if isnan(res.iloc[i, 5]) == False:
-        user_info.center = res.iloc[i, 5]
-        # if isnan(res.iloc[i, 6]) == False:
-        user_info.voltage_level = res.iloc[i, 6]
-        # if isnan(res.iloc[i, 7]) == False:
-        user_info.user_type = res.iloc[i, 7]
-        # if isnan(res.iloc[i, 8]) == False:
-        user_info.district = res.iloc[i, 8]
-        # if isnan(res.iloc[i, 9]) == False:
-        # print(isnan(res.iloc[i, 9]))
-        user_info.lon = res.iloc[i, 9]
-        # if isnan(res.iloc[i, 10]) == False:
-        user_info.lat = res.iloc[i, 10]
-        # if isnan(res.iloc[i, 11]) == False:
-        user_info.std_industry_name = res.iloc[i, 11]
-        # if isnan(res.iloc[i, 12]) == False:
-        user_info.std_industry_id = res.iloc[i, 12]
-        # if isnan(res.iloc[i, 13]) == False:
-        user_info.company_nature = res.iloc[i, 13]
-        # if isnan(res.iloc[i, 14]) == False:
-        user_info.is_core = res.iloc[i, 14]
-        # if isnan(res.iloc[i, 15]) == False:
-        user_info.key_industry_id = res.iloc[i, 15]
-        # if isnan(res.iloc[i, 16]) == False:
-        user_info.build_date = res.iloc[i, 16]
+        if pd.isnull(res.iloc[i, 1]) == False:
+            user_info.user_name = res.iloc[i, 1]
+        else:
+            user_info.user_name = None
+
+        if pd.isnull(res.iloc[i, 2]) == False:
+            user_info.sector = res.iloc[i, 2]
+        else:
+            user_info.sector = None
+
+        if pd.isnull(res.iloc[i, 3]) == False:
+            user_info.address = res.iloc[i, 3]
+        else:
+            user_info.address = None
+
+        if pd.isnull(res.iloc[i, 4]) == False:
+            user_info.branch = res.iloc[i, 4]
+        else:
+            user_info.branch = None
+
+        if pd.isnull(res.iloc[i, 5]) == False:
+            user_info.center = res.iloc[i, 5]
+        else:
+            user_info.center = None
+
+        if pd.isnull(res.iloc[i, 6]) == False:
+            user_info.voltage_level = res.iloc[i, 6]
+        else:
+            user_info.voltage_level = None
+
+        if pd.isnull(res.iloc[i, 7]) == False:
+            user_info.user_type = res.iloc[i, 7]
+        else:
+            user_info.user_type = None
+
+        if pd.isnull(res.iloc[i, 8]) == False:
+            user_info.district = res.iloc[i, 8]
+        else:
+            user_info.district = None
+
+        if pd.isnull(res.iloc[i, 9]) == False:
+            user_info.lon = res.iloc[i, 9]
+        else:
+            user_info.lon = None
+
+        if pd.isnull(res.iloc[i, 10]) == False:
+            user_info.lat = res.iloc[i, 10]
+        else:
+            user_info.lat = None
+
+        if pd.isnull(res.iloc[i, 11]) == False:
+            user_info.std_industry_name = res.iloc[i, 11]
+        else:
+            user_info.std_industry_name = None
+
+        if pd.isnull(res.iloc[i, 12]) == False:
+            user_info.std_industry_id = res.iloc[i, 12]
+        else:
+            user_info.std_industry_id = None
+
+        if pd.isnull(res.iloc[i, 13]) == False:
+            user_info.company_nature = res.iloc[i, 13]
+        else:
+            user_info.company_nature = None
+
+        if pd.isnull(res.iloc[i, 14]) == False:
+            user_info.is_core = res.iloc[i, 14]
+        else:
+            user_info.is_core = None
+
+        if pd.isnull(res.iloc[i, 15]) == False:
+            user_info.key_industry_id = res.iloc[i, 15]
+        else:
+            user_info.key_industry_id = None
+
+        if pd.isnull(res.iloc[i, 16]) == False:
+            user_info.build_date = res.iloc[i, 16]
+        else:
+            user_info.build_date = None
+
         session.commit()
 
         """
