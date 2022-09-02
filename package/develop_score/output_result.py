@@ -38,12 +38,9 @@ def outputIndustryScores():
     areaIndustryGrowthScore = areaIndustryGrowth * np.log2(industryCountOfArea) / industryCountOfArea
     areaDevelopQualityScore = areaDevelopQuality * np.log2(industryCountOfArea) / industryCountOfArea
     areaIndustryStabilityScore = areaIndustryStability * np.log2(industryCountOfArea) / industryCountOfArea
-    areaIndustryOverallScore = (
-                                       areaIndustryScaleScore + areaIndustryGrowthScore + areaDevelopQualityScore + areaIndustryStabilityScore) / 4
-    areaResults = pd.concat(
-        [areaIndustryOverallScore, areaIndustryScaleScore, areaIndustryGrowthScore, areaDevelopQualityScore,
-         areaIndustryStabilityScore],
-        axis=1).reset_index()
+    areaIndustryOverallScore = (areaIndustryScaleScore + areaIndustryGrowthScore + areaDevelopQualityScore + areaIndustryStabilityScore) / 4
+    areaResults = pd.concat([areaIndustryOverallScore, areaIndustryScaleScore, areaIndustryGrowthScore,
+                             areaDevelopQualityScore, areaIndustryStabilityScore], axis=1).reset_index()
     areaResults.columns = ["region_name", "overall_score", "scale_score_l1", "growth_score_l1", "quality_score_l1",
                            "stability_score_l1"]
     areaResults.insert(1, "start_time",
@@ -66,16 +63,19 @@ def outputSeasonScores():
     timeRange = psd.getSeasonTimeRange()
     year = datetime.strptime(timeRange["end_time"][0], "%Y-%m-%d %H:%M:%S").strftime("%Y")
     quarter = datetime.strptime(timeRange["end_time"][0], "%Y-%m-%d %H:%M:%S").strftime("%m")
-    # if quarter in [3, 6, 9, 12]:
-    #     results["stat_time"] = f"{year}-Q{int(quarter) / 3}"
-    #     results["frequency"] = 2
-    #     time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    #     results["create_time"] = time
-    #     columns = ["region_name", "std_industry_id", "stat_time", "scale_score_l1", "frequency", "create_time"]
-    #     results = results[columns]
-    #     return results
-    # else:
-    #     print("未到季度更新节点，数据不需要更新！")
+
+    """
+    if quarter in [3, 6, 9, 12]:
+        results["stat_time"] = f"{year}-Q{int(quarter) / 3}"
+        results["frequency"] = 2
+        time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        results["create_time"] = time
+        columns = ["region_name", "std_industry_id", "stat_time", "scale_score_l1", "frequency", "create_time"]
+        results = results[columns]
+        return results
+    else:
+        print("未到季度更新节点，数据不需要更新！")
+    """
 
     results["stat_time"] = f"{year}0{int(int(quarter) / 3)}"
     results["frequency"] = 2
@@ -96,16 +96,19 @@ def outputYearScores():
         inplace=True)
     timeRange = psd.getTaskTimeRange()
     year = datetime.strptime(timeRange["end_time"][0], "%Y-%m-%d %H:%M:%S").strftime("%Y")
-    # if quarter in [3, 6, 9, 12]:
-    #     results["stat_time"] = f"{year}"
-    #     results["frequency"] = 2
-    #     time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    #     results["create_time"] = time
-    #     columns = ["region_name", "std_industry_id", "stat_time", "scale_score_l1", "frequency", "create_time"]
-    #     results = results[columns]
-    #     return results
-    # else:
-    #     print("未到季度更新节点，数据不需要更新！")
+
+    """
+    if quarter in [3, 6, 9, 12]:
+        results["stat_time"] = f"{year}"
+        results["frequency"] = 2
+        time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        results["create_time"] = time
+        columns = ["region_name", "std_industry_id", "stat_time", "scale_score_l1", "frequency", "create_time"]
+        results = results[columns]
+        return results
+    else:
+        print("未到季度更新节点，数据不需要更新！")
+    """
 
     results["stat_time"] = f"{year}"
     results["frequency"] = 1

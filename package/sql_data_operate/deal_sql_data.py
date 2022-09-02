@@ -4,17 +4,6 @@ from package.sql_data_operate import pull_sql_data as psd
 import re
 
 
-# 获取user_info的所有字段，修改并存入数据库 -----v1
-def modifyUserInfo():
-    data = dealOriginData()
-    columns = ["user_code", "user_name", "sector", "address", "branch", "center", "voltage_level", "user_type",
-               "district", "lon", "lat", "std_industry_name", "std_industry_id", "company_nature", "is_core"]
-    data.insert(4, "branch", None)
-    data.insert(data.shape[1], "key_industry_id", None)
-    data = data[columns]
-    return data
-
-
 # 处理数据并转成user_info    -------v2
 def compile(sequence):
     regex = "(.*)\(.*\)$"
@@ -71,8 +60,7 @@ def dealOriginData():
                 continue
     areaDict = {"卢湾": "黄浦", "闸北": "静安", "南汇": "浦东", "漕河泾": "徐汇"}
 
-    data["district"] = data["district"].apply(lambda x: areaDict.get(x) if areaDict.get(x)!=None else x)
-    print(data)
+    data["district"] = data["district"].apply(lambda x: areaDict.get(x) if areaDict.get(x) != None else x)
     data = pd.merge(data, userType, how="left", on="electypecode")
     data = pd.merge(data, orgno, how="left", on="orgno")
     data = pd.merge(data, voltage, how="left", on="voltcode")
@@ -93,12 +81,53 @@ def dealOriginData():
                          "volt_level": "voltage_level", "Id": "std_industry_id", "nature": "company_nature"},
                 inplace=True)
 
-    print(data.columns)
     return data
 
 
-# dealOriginData()
+# 获取user_info的所有字段，修改并存入数据库 -----v1
+def modifyUserInfo():
+    data = dealOriginData()
+    """
+    data字段名
+    ['user_code', 'user_name', 'address', 'sector', 'std_industry_name',
+     'district', 'user_type', 'center', 'voltage_level', 'std_industry_id',
+     'company_nature', 'is_core', 'lon', 'lat']
+     """
 
+    refStdKIndustry = psd.getRefStdKIndustry()
+    refSectorKIndustry = psd.getRefSectorKIndustry()
+    refNameKIndustry = psd.getRefNameKIndustry()
+    keyIndustry = psd.getKeyIndustry()
+    keyIndustry.rename(columns={"kiId": "key_industry_id"}, inplace=True)
+
+    results = pd.merge(data, refNameKIndustry, how="left", on="user_name")
+    results = pd.merge(results, refStdKIndustry, how="left", on="std_industry_name")
+    results = pd.merge(results, refSectorKIndustry, how="left", on="sector")
+
+    results.loc[results["key_industry_name"].isnull(), "key_industry_name"] = results["key_industry_name_1"]
+    results.loc[results["key_industry_name"].isnull(), "key_industry_name"] = results["key_industry_name_2"]
+    results.drop(columns=["key_industry_name_1", "key_industry_name_2"], axis=1, inplace=True)
+
+    """
+    用名称匹配得到的行业信息不准确，需要改善
+    # for i in range(results.shape[0]):
+    #     if re.match(".*船.*", results.loc[i, "user_name"]) != None and results.loc[i, "key_industry_name"] == "航空航天":
+    #         results.loc[i, "key_industry_name"] = "船舶"
+    #     elif re.match(".*飞机|机场|航空|航天.*", results.loc[i, "user_name"]) != None and results.loc[i, "key_industry_name"] != "航空航天":
+    #         results.loc[i, "key_industry_name"] = "航空航天"
+    #     else:
+    #         continue
+    """
+
+    results = pd.merge(results, keyIndustry, how="left", on="key_industry_name")
+    columns = ["user_code", "user_name", "sector", "address", "branch", "center", "voltage_level", "user_type",
+               "district", "lon", "lat", "std_industry_name", "std_industry_id", "company_nature", "is_core",
+               "key_industry_id", "build_date"]
+    results.insert(4, "branch", None)
+    # data.insert(data.shape[1], "key_industry_id", None)
+    results = results[columns]
+    print("user_info已生成！")
+    return results
 
 # 获取两年的月度数据
 def dealElectricity(data=psd.getMonthElectricity()):
@@ -201,7 +230,7 @@ def dealYearElectricity(data=psd.getYearElectricity()):
     print("电力数据拼接完成")
     return monthData
 
-
+"""
 # 拼接成key_enterprise表，但还没有输出
 def concatUserInfoAndKuData():
     data = psd.getUserInfo()
@@ -213,8 +242,8 @@ def concatUserInfoAndKuData():
     columns = ["user_name", "user_code", "key_industry_name", "address_x", "district_x", "nature", "type"]
     results = results[columns]
     print(results)
-
-
+"""
+"""
 def concatCreatityType():
     data = psd.getUserInfo()
     creativityEnterpriseData = psd.getCreativityEnterpriseData()
@@ -227,3 +256,4 @@ def concatCreatityType():
 
 # concatUserInfoAndKuData()
 # concatCreatityType()
+"""

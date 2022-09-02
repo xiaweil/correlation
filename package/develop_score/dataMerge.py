@@ -15,7 +15,7 @@ def getIndustrialScore():
     voltage = psd.getVoltageData()
     industryLibrary = psd.getIndustryLibrary()
     data = data[data["industryClass"].isin(list(industryLibrary["industryClass"]))]
-
+    data = data[data["division"].notnull()]
     result1 = finalMerge(data, voltage, val2019, val2017)
     result2 = calFunZb(data)
     result2.rename(columns={'division': 'division1', 'industryClass': 'industryClass1'}, inplace=True)
@@ -23,6 +23,7 @@ def getIndustrialScore():
                       right_on=['division1', 'industryClass1'])
     result.drop(columns=['division1', 'industryClass1'], inplace=True)
     # result.to_csv("./sqlData/endResults.csv", index=False)
+
     # FA计算得分
     print("开始因子分析")
     scores = mainV2(result)

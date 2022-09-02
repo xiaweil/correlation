@@ -97,9 +97,9 @@ def getYearElectricity(session):
 # v2生成user_info表
 @operateSqlData
 def getUserl0(session):
-    sql = "select consid, consname, elecaddr, tradecode, electypecode, voltcode, orgno from cstconsumer_s_l0"
+    sql = "select consid, consname, elecaddr, tradecode, electypecode, voltcode, orgno, builddate from cstconsumer_s_l0"
     result = session.execute(sql)
-    data = pd.DataFrame(result, columns=["consid", "consname", "elecaddr", "tradecode", "electypecode", "voltcode", "orgno"])
+    data = pd.DataFrame(result, columns=["consid", "consname", "elecaddr", "tradecode", "electypecode", "voltcode", "orgno", "build_date"])
     return data
 
 @operateSqlData
@@ -157,7 +157,7 @@ def getUserInfo(session):
     result = session.execute(sql)
     data = pd.DataFrame(result, columns=["id", "user_code", "user_name", "sector", "address", "branch", "center",
                                "voltage_level", "user_type", "district", "lon", "lat", "std_industry_name",
-                               "std_industry_id", "company_nature", "is_core", "key_industry_id"])
+                               "std_industry_id", "company_nature", "is_core", "key_industry_id", "build_date"])
     return data
 
 @operateSqlData
@@ -245,4 +245,25 @@ def getCreativityEnterpriseData(session):
     sql = "select user_name, district_name, type from creativity_type"
     result = session.execute(sql)
     data = pd.DataFrame(result, columns=["company_name", "district", "creativity_mode"])
+    return data
+
+@operateSqlData
+def getRefStdKIndustry(session):
+    sql = "select * from ref_std_k_industry"
+    result = session.execute(sql)
+    data = pd.DataFrame(result, columns=["std_industry_name", "key_industry_name_1"])
+    return data
+
+@operateSqlData
+def getRefSectorKIndustry(session):
+    sql = "select * from ref_sector_k_industry"
+    result = session.execute(sql)
+    data = pd.DataFrame(result, columns=["sector", "key_industry_name_2"])
+    return data
+
+@operateSqlData
+def getRefNameKIndustry(session):
+    sql = "select * from ref_name_k_industry"
+    result = session.execute(sql)
+    data = pd.DataFrame(result, columns=["user_name", "key_industry_name"])
     return data
