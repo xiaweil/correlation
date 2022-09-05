@@ -46,11 +46,15 @@ def calIndustryScaleData(data, columns):
     results.drop("industry", inplace=True, axis=1)
 
     #计算相同产业企业总数
-    sameIndustryTotal = totalCompany.groupby("hydl", as_index=False)['companyTotal'].sum().rename(
-        columns={"companyTotal": "industryCompany"})
-    results = pd.merge(results, sameIndustryTotal, how="left", left_on="industryClass",
-                       right_on="hydl")
-    results.drop("hydl", inplace=True, axis=1)
+    """
+    # sameIndustryTotal = totalCompany.groupby("hydl", as_index=False)['companyTotal'].sum().rename(
+    #     columns={"companyTotal": "industryCompany"})
+    """
+
+    sameIndustryTotal = totalCompany.rename(columns={"companyTotal": "industryCompany"})
+    results = pd.merge(results, sameIndustryTotal, how="left", left_on=["division", "industryClass"],
+                       right_on=["xzqh", "hydl"])
+    results.drop(columns=["xzqh","hydl"], inplace=True, axis=1)
     print("产业规模计算完成")
     return results
 

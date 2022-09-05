@@ -37,6 +37,7 @@ def __factorAnalysis(data):
     # A = fa.loadings_  # 计算因子载荷阵
 
     # weight = np.array(abs(A))
+    #
     weight = np.random.random((len(data[0]), 1))
 
     ratio = []
@@ -54,6 +55,7 @@ def __factorAnalysis(data):
     scores = np.dot(data, ratio)
 
     scores = pd.DataFrame(scores, columns=[title])
+
     return scores
 
 
@@ -70,6 +72,7 @@ def mainV2(data):
         print(f"加载第{i+1}节点数据完成")
         result = __checkModel(nodeData)
         results = pd.concat([results, result], axis=1)
+    results.to_csv("../../data/weight.csv", index=False)
     return results
 
 def mainVs(data):

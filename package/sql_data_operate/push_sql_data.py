@@ -7,8 +7,7 @@ from package.develop_score import output_result as ore
 from package.sql_data_operate import pull_sql_data as psd
 from package.db_connect.connect import operateSqlData
 from package.db_connect.base import User
-from math import isnan
-
+from memory_profiler import profile
 
 # 保存userInfo到数据库
 @operateSqlData
@@ -141,7 +140,7 @@ def pushUserInfo(session):
     if (~insertData.empty):
         insertData.to_sql("user_info", con=connect.mysql_engine(), if_exists="append", index=False)
 
-
+@profile
 def pushIndustrialScore():
     data, areaData = ore.outputIndustryScores()
     data.to_sql("evaluation_industrial", con=connect.mysql_engine(), if_exists="append", index=False)
@@ -163,8 +162,9 @@ def pushCreativityData():
     data.to_sql("creativity_type", con=connect.mysql_engine(), if_exists="append", index=False)
 
 
-pushUserInfo()
-# pushIndustrialScore()
+# pushUserInfo()
+pushIndustrialScore()
+
 # pushYearIndustryTrend()
 
 # pushCreativityData()

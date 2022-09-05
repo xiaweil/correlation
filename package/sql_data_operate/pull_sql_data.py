@@ -42,7 +42,9 @@ def getval2017(session):
 @operateSqlData
 def getMonthElectricity(session):
     sql = "select cons_no, cons_name, mr_date, dl from gdc_kie_deq_info_l0 where mr_date > " \
-          "(select distinct date_sub(mr_date,interval 2 year) from gdc_kie_deq_info_l0 order by mr_date desc limit 1);"
+          "(select date_sub(if(day(a.latest_day)>25, a.latest_day, last_month), interval 2 year) from " \
+          "(select last_day(subdate(mr_date, interval 1 month)) as last_month, mr_date as latest_day from gdc_kie_deq_info_l0 " \
+          "order by mr_date desc limit 1) a;);"
     result = session.execute(sql)
     data = pd.DataFrame(result, columns=["cons_no", "cons_name", "mr_date", "dl"])
     data["mr_date"] = data["mr_date"].apply(
@@ -53,7 +55,9 @@ def getMonthElectricity(session):
 @operateSqlData
 def getSeasonElectricity(session):
     sql = "select cons_no, cons_name, mr_date, dl from gdc_kie_deq_info_l0 where mr_date > " \
-          "(select distinct date_sub(mr_date,interval 3 month) from gdc_kie_deq_info_l0 order by mr_date desc limit 1);"
+          "(select if(day(a.latest_day)>25, date_sub(a.latest_day, interval 3 month), date_sub(last_month, interval 3 month)) from " \
+          "(select last_day(subdate(mr_date, interval 1 month)) as last_month, mr_date as latest_day from gdc_kie_deq_info_l0 " \
+          "order by mr_date desc limit 1) a;);"
     result = session.execute(sql)
     data = pd.DataFrame(result, columns=["cons_no", "cons_name", "mr_date", "dl"])
     data["mr_date"] = data["mr_date"].apply(
@@ -64,7 +68,9 @@ def getSeasonElectricity(session):
 @operateSqlData
 def getYearElectricity(session):
     sql = "select cons_no, cons_name, mr_date, dl from gdc_kie_deq_info_l0 where mr_date > " \
-          "(select distinct date_sub(mr_date,interval 1 year) from gdc_kie_deq_info_l0 order by mr_date desc limit 1);"
+          "(select if(day(a.latest_day)>25, date_sub(a.latest_day, interval 1 year), date_sub(last_month, interval 1 year)) from " \
+          "(select last_day(subdate(mr_date, interval 1 month)) as last_month, mr_date as latest_day from gdc_kie_deq_info_l0 " \
+          "order by mr_date desc limit 1) a;);"
     result = session.execute(sql)
     data = pd.DataFrame(result, columns=["cons_no", "cons_name", "mr_date", "dl"])
     data["mr_date"] = data["mr_date"].apply(
