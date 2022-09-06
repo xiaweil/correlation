@@ -36,6 +36,7 @@ def updateMonthEleData(session):
             session.add(newEle)
             session.commit()
 
+
 # 保存userInfo到数据库
 @operateSqlData
 def pushUserInfo(session):
@@ -167,7 +168,6 @@ def pushUserInfo(session):
     if (~insertData.empty):
         insertData.to_sql("user_info", con=connect.mysql_engine(), if_exists="append", index=False)
 
-
 @profile
 def pushIndustrialScore():
     data, areaData = ore.outputIndustryScores()
@@ -195,6 +195,6 @@ def pushCreativityData():
 # pushUserInfo()
 # pushIndustrialScore()
 # pushIndustryTrend()
-pushYearIndustryTrend()
+# pushYearIndustryTrend()
 
 # pushCreativityData()

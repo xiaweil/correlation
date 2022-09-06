@@ -88,16 +88,16 @@ def outputSeasonScores():
     return results
 
 # 输出年度产业规模得分
-def outputYearScores():
-    results = dm.getYearIndustrialScore()
+def outputYearScores(results = dm.getYearIndustrialScore(), timeRange = psd.getTaskTimeRange()):
+    results = results
     industryMap = psd.getIndustryMap()
     results = pd.merge(results, industryMap, how="left", left_on="industryClass", right_on="std_industry_name")
     results.drop(columns=["std_industry_name"], inplace=True, axis=1)
     results.rename(
         columns={"division": "region_name", "industryClass": "std_industry_name", "年度产业规模得分": "scale_score_l1"},
         inplace=True)
-    timeRange = psd.getTaskTimeRange()
-    year = datetime.strptime(timeRange["end_time"][0], "%Y-%m-%d").strftime("%Y")
+
+    year = datetime.strptime(str(timeRange["end_time"][0]), "%Y-%m-%d").strftime("%Y")
 
     """
     if quarter in [3, 6, 9, 12]:

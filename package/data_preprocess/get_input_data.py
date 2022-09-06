@@ -91,9 +91,9 @@ def generateSeasonInputData():
     return v3InputData
 
 # 获取年度数据输入表
-def generateYearInputData():
+def generateYearInputData(dataEle = dsd.dealYearElectricity()):
     # 获取电力数据表
-    dataEle = dsd.dealYearElectricity()
+    dataEle = dataEle
 
     # 获取user_info表
     user_info = getUserInfoTemp()

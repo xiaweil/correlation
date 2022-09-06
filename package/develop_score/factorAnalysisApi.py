@@ -76,6 +76,11 @@ def mainV2(data):
     return results
 
 def mainVs(data):
+    data['output_sum_l3'] = data['output_sum_l3'].apply(lambda x: np.log10(x))
+    data['electricity_sum_l3'] = data['electricity_sum_l3'].apply(lambda x: np.log10(x))
+    data['electricity_avg_l3'] = data['electricity_avg_l3'].apply(lambda x: np.log10(x))
+    data['electricity_max_l3'] = data['electricity_max_l3'].apply(lambda x: np.log10(x))
+    data['electricity_sum_max_l3'] = data['electricity_sum_max_l3'].apply(lambda x: np.log10(x))
     node = [2, 12]
     results = data.iloc[:, 0:2]
     for i in range(len(node) - 1):
