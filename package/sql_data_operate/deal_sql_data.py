@@ -4,6 +4,16 @@ from package.sql_data_operate import pull_sql_data as psd
 import re
 
 
+# 日度数据转月度数据并存入数据库
+def toMonthData(operate):
+    if operate == 0:
+        data = psd.dayData2monthData()
+    elif operate == 1:
+        data = psd.updateMonthData()
+    monthData = data.groupby(["cons_no", "cons_name", "mr_date"], as_index=False)["dl"].sum()
+    return monthData
+
+
 # 处理数据并转成user_info    -------v2
 def compile(sequence):
     regex = "(.*)\(.*\)$"
@@ -129,10 +139,13 @@ def modifyUserInfo():
     print("user_info已生成！")
     return results
 
+
 # 获取两年的月度数据
 def dealElectricity(data=psd.getMonthElectricity()):
-    monthData = data.groupby(["cons_no", "mr_date"])["dl"].sum()
-    monthData = monthData.unstack().rename_axis(columns=None).reset_index()
+    # monthData = data.groupby(["cons_no", "mr_date"])["dl"].sum()
+    monthData = data[["cons_no", "mr_date", "dl"]]
+    monthData.set_index(["cons_no", "mr_date"], drop=True, inplace=True)
+    monthData = monthData.unstack()['dl'].rename_axis(columns=None).reset_index()
     __columnsName = [f"month{i}" for i in range(1, 25)]
     __columnsEle = __columnsName.copy()
     __columnsName.insert(0, "userId")
@@ -164,7 +177,9 @@ def dealElectricity(data=psd.getMonthElectricity()):
 
 # 获取季度电力数据
 def dealSeasonElectricity(data=psd.getSeasonElectricity()):
-    monthData = data.groupby(["cons_no", "mr_date"])["dl"].sum()
+    # monthData = data.groupby(["cons_no", "mr_date"])["dl"].sum()
+    monthData = data[["cons_no", "mr_date", "dl"]]
+    monthData.set_index(["cons_no", "mr_date"], inplace=True)
     monthData = monthData.unstack().rename_axis(columns=None).reset_index()
     __columnsName = [f"season{i}" for i in range(1, 4)]
     __columnsEle = __columnsName.copy()
@@ -200,7 +215,9 @@ def dealSeasonElectricity(data=psd.getSeasonElectricity()):
 
 # 获取年度产业数据
 def dealYearElectricity(data=psd.getYearElectricity()):
-    monthData = data.groupby(["cons_no", "mr_date"])["dl"].sum()
+    # monthData = data.groupby(["cons_no", "mr_date"])["dl"].sum()
+    monthData = data[["cons_no", "mr_date", "dl"]]
+    monthData.set_index(["cons_no", "mr_date"], inplace=True)
     monthData = monthData.unstack().rename_axis(columns=None).reset_index()
     __columnsName = [f"year{i}" for i in range(1, 13)]
     __columnsEle = __columnsName.copy()
@@ -229,6 +246,7 @@ def dealYearElectricity(data=psd.getYearElectricity()):
     monthData["mean"] = monthData["sum"] / monthData["period"]
     print("电力数据拼接完成")
     return monthData
+
 
 """
 # 拼接成key_enterprise表，但还没有输出

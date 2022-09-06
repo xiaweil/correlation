@@ -6,8 +6,35 @@ from package.db_connect import connect
 from package.develop_score import output_result as ore
 from package.sql_data_operate import pull_sql_data as psd
 from package.db_connect.connect import operateSqlData
-from package.db_connect.base import User
+from package.db_connect.base import User, Electricity
 from memory_profiler import profile
+from sqlalchemy import and_
+
+# 第一次l0表格全入
+def pushMonthData():
+    data = dsd.toMonthData(0)
+    data.to_sql("montheledata", con=connect.mysql_engine(), if_exists="append", index=False)
+
+
+@operateSqlData
+def updateMonthEleData(session):
+    data = dsd.toMonthData(1)
+    latestDate = psd.getMonthDate()
+    for i in range(data.shape[0]):
+        if data.iloc[i, 2] <= latestDate:
+            electricity = session.query(Electricity).filter(and_(Electricity.cons_no == data.iloc[i, 0],
+                                                                 Electricity.cons_name == data.iloc[i, 1],
+                                                                 Electricity.mr_date == data.iloc[i, 2])).first()
+            if pd.isnull(data.iloc[i,3]) == False:
+                electricity.dl = data.iloc[i, 3]
+            else:
+                electricity.dl = None
+            session.commit()
+        else:
+            newEle = Electricity(cons_no=data.iloc[i, 0], cons_name=data.iloc[i, 1], mr_date=data.iloc[i, 2],
+                                 dl=data.iloc[i, 3])
+            session.add(newEle)
+            session.commit()
 
 # 保存userInfo到数据库
 @operateSqlData
@@ -140,6 +167,7 @@ def pushUserInfo(session):
     if (~insertData.empty):
         insertData.to_sql("user_info", con=connect.mysql_engine(), if_exists="append", index=False)
 
+
 @profile
 def pushIndustrialScore():
     data, areaData = ore.outputIndustryScores()
@@ -162,6 +190,8 @@ def pushCreativityData():
     data.to_sql("creativity_type", con=connect.mysql_engine(), if_exists="append", index=False)
 
 
+# pushMonthData()
+# updateMonthEleData()
 # pushUserInfo()
 pushIndustrialScore()
 

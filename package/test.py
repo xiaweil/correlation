@@ -9,3 +9,6 @@ import re
 
 areaDict = {"卢湾": "黄浦", "闸北": "静安", "南汇": "浦东", "漕河泾": "徐汇"}
 print(areaDict.get("shangh "))
+
+
+print("2021-04">"2020-02")

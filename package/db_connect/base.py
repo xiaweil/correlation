@@ -31,3 +31,11 @@ class User(Base):
     key_industry_id = Column(INT)
     build_date = Column(VARCHAR(255))
 
+class Electricity(Base):
+    __tablename__ = "montheledata"
+    id = Column(INT, primary_key=True)
+    cons_no = Column(VARCHAR(255))
+    cons_name = Column(VARCHAR(255))
+    mr_date = Column(VARCHAR(255))
+    dl = Column(DOUBLE(10, 2))
+

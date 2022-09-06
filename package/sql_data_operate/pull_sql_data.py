@@ -40,41 +40,98 @@ def getval2017(session):
 # 获取因子分析前的输入表
 # 读取电力数据表
 @operateSqlData
-def getMonthElectricity(session):
-    sql = "select cons_no, cons_name, mr_date, dl from gdc_kie_deq_info_l0 where mr_date > " \
-          "(select date_sub(if(day(a.latest_day)>25, a.latest_day, last_month), interval 2 year) from " \
-          "(select last_day(subdate(mr_date, interval 1 month)) as last_month, mr_date as latest_day from gdc_kie_deq_info_l0 " \
-          "order by mr_date desc limit 1) a;);"
+def dayData2monthData(session):
+    sql = "select cons_no, cons_name, mr_date, dl from gdc_kie_deq_info_l0 where mr_date<=" \
+          "(select if(day(b.latest_day)>=25, b.latest_day, last_month) from " \
+          "(select last_day(subdate(max(mr_date), interval 1 month)) as last_month, max(mr_date) as latest_day from gdc_kie_deq_info_l0) b);"
     result = session.execute(sql)
     data = pd.DataFrame(result, columns=["cons_no", "cons_name", "mr_date", "dl"])
     data["mr_date"] = data["mr_date"].apply(
         lambda x: datetime.strptime(x, "%Y-%m-%d %H:%M:%S").strftime("%Y-%m"))
+    return data
+
+@operateSqlData
+def updateMonthData(session):
+    sql = "select cons_no, cons_name, mr_date, dl from gdc_kie_deq_info_l0 where mr_date > " \
+          "(select subdate(str_to_date(concat(max(mr_date),'-01'), '%Y-%m-%d'), interval 2 month) from montheledata) and mr_date<= " \
+          "(select if(day(b.latest_day)>=25, b.latest_day, last_month) from " \
+          "(select last_day(subdate(max(mr_date), interval 1 month)) as last_month, max(mr_date) as latest_day from gdc_kie_deq_info_l0) b);"
+    result = session.execute(sql)
+    data = pd.DataFrame(result, columns=["cons_no", "cons_name", "mr_date", "dl"])
+    data["mr_date"] = data["mr_date"].apply(
+        lambda x: datetime.strptime(x, "%Y-%m-%d %H:%M:%S").strftime("%Y-%m"))
+    return data
+
+@operateSqlData
+def getMonthDate(session):
+    sql = "select max(mr_date) from montheledata"
+    result = session.execute(sql)
+    return result.all()[0][0]
+
+@operateSqlData
+def getMonthElectricity(session):
+    """
+    没有月度表的解决方案
+
+    sql = "select cons_no, cons_name, mr_date, dl from gdc_kie_deq_info_l0 where mr_date > " \
+          "(select date_sub(if(day(a.latest_day)>=25, a.latest_day, last_month), interval 2 year) from " \
+          "(select last_day(subdate(max(mr_date), interval 1 month)) as last_month, max(mr_date) as latest_day from gdc_kie_deq_info_l0) a) " \
+          "and mr_date <= (select if(day(b.latest_day)>=25, b.latest_day, last_month) from " \
+          "(select last_day(subdate(max(mr_date), interval 1 month)) as last_month, max(mr_date) as latest_day from gdc_kie_deq_info_l0) b)"
+    """
+
+    sql = "select cons_no, cons_name, mr_date, dl from montheledata where mr_date >" \
+          "(select subdate(max(concat(mr_date,  '-01')), interval 2 year) from montheledata)"
+    result = session.execute(sql)
+    data = pd.DataFrame(result, columns=["cons_no", "cons_name", "mr_date", "dl"])
+
+    """
+    data["mr_date"] = data["mr_date"].apply(
+        lambda x: datetime.strptime(x, "%Y-%m-%d %H:%M:%S").strftime("%Y-%m"))
+    """
+
     return data
 
 
 @operateSqlData
 def getSeasonElectricity(session):
+    """
     sql = "select cons_no, cons_name, mr_date, dl from gdc_kie_deq_info_l0 where mr_date > " \
-          "(select if(day(a.latest_day)>25, date_sub(a.latest_day, interval 3 month), date_sub(last_month, interval 3 month)) from " \
-          "(select last_day(subdate(mr_date, interval 1 month)) as last_month, mr_date as latest_day from gdc_kie_deq_info_l0 " \
-          "order by mr_date desc limit 1) a;);"
+          "(select if(day(a.latest_day)>25, date_sub(date_add(a.latest_day,interval 1 day), interval 3 month), date_sub(last_month, interval 3 month)) from " \
+          "(select last_day(subdate(max(mr_date), interval 1 month)) as last_month, max(mr_date) as latest_day from gdc_kie_deq_info_l0) a)"
+    """
+
+    sql = "select cons_no, cons_name, mr_date, dl from montheledata where mr_date >" \
+          "(select subdate(max(concat(mr_date, '-01')), interval 3 month) from montheledata)"
     result = session.execute(sql)
     data = pd.DataFrame(result, columns=["cons_no", "cons_name", "mr_date", "dl"])
+
+    """
     data["mr_date"] = data["mr_date"].apply(
         lambda x: datetime.strptime(x, "%Y-%m-%d %H:%M:%S").strftime("%Y-%m"))
+    """
+
     return data
 
 
 @operateSqlData
 def getYearElectricity(session):
+    """
     sql = "select cons_no, cons_name, mr_date, dl from gdc_kie_deq_info_l0 where mr_date > " \
           "(select if(day(a.latest_day)>25, date_sub(a.latest_day, interval 1 year), date_sub(last_month, interval 1 year)) from " \
-          "(select last_day(subdate(mr_date, interval 1 month)) as last_month, mr_date as latest_day from gdc_kie_deq_info_l0 " \
-          "order by mr_date desc limit 1) a;);"
+          "(select last_day(subdate(max(mr_date), interval 1 month)) as last_month, max(mr_date) as latest_day from gdc_kie_deq_info_l0) a) "
+    """
+
+    sql = "select cons_no, cons_name, mr_date, dl from montheledata where mr_date >" \
+          "(select subdate(max(concat(mr_date, '-01')), interval 1 year) from montheledata)"
     result = session.execute(sql)
     data = pd.DataFrame(result, columns=["cons_no", "cons_name", "mr_date", "dl"])
+
+    """
     data["mr_date"] = data["mr_date"].apply(
         lambda x: datetime.strptime(x, "%Y-%m-%d %H:%M:%S").strftime("%Y-%m"))
+    """
+
     return data
 
 # # v1生成user_info表
@@ -208,8 +265,8 @@ def getIndustryLibrary(session):
 
 @operateSqlData
 def getTaskTimeRange(session):
-    sql = "select distinct date_sub(mr_date, interval 2 year) as start_time, mr_date as end_time from gdc_kie_deq_info_l0 " \
-          "order by mr_date desc limit 1"
+    sql = "select subdate(adddate(last_day(concat(max(mr_date), '-01')), interval 1 day), interval 2 year), " \
+          "max(last_day(concat(mr_date, '-01'))) from montheledata)"
     result = session.execute(sql)
     data = pd.DataFrame(result, columns=["start_time", "end_time"])
     return data
@@ -217,8 +274,7 @@ def getTaskTimeRange(session):
 
 @operateSqlData
 def getSeasonTimeRange(session):
-    sql = "select mr_date as end_time from gdc_kie_deq_info_l0 " \
-          "order by mr_date desc limit 1"
+    sql = "select max(last_day(concat(mr_date, '-01'))) from montheledata; "
     result = session.execute(sql)
     data = pd.DataFrame(result, columns=["end_time"])
     return data
