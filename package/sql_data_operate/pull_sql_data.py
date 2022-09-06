@@ -266,7 +266,7 @@ def getIndustryLibrary(session):
 @operateSqlData
 def getTaskTimeRange(session):
     sql = "select subdate(adddate(last_day(concat(max(mr_date), '-01')), interval 1 day), interval 2 year), " \
-          "max(last_day(concat(mr_date, '-01'))) from montheledata)"
+          "max(last_day(concat(mr_date, '-01'))) from montheledata;"
     result = session.execute(sql)
     data = pd.DataFrame(result, columns=["start_time", "end_time"])
     return data

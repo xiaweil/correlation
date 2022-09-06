@@ -11,8 +11,10 @@ def outputIndustryScores():
     # 计算分区域分产业得分
     timeRange = psd.getTaskTimeRange()
     results = dm.getIndustrialScore()
-    results["start_time"] = datetime.strptime(timeRange["start_time"][0], "%Y-%m-%d %H:%M:%S").strftime("%Y-%m-%d")
-    results["end_time"] = datetime.strptime(timeRange["end_time"][0], "%Y-%m-%d %H:%M:%S").strftime("%Y-%m-%d")
+    results["start_time"] = datetime.strptime(str(timeRange["start_time"][0]), "%Y-%m-%d").strftime("%Y-%m-%d")
+    # results["start_time"] = timeRange['start_time'][0].strftime("%Y-%m-%d")
+    results["end_time"] = datetime.strptime(str(timeRange["end_time"][0]), "%Y-%m-%d").strftime("%Y-%m-%d")
+    # results["end_time"] = timeRange["end_time"][0].strftime("%Y-%m-%d")
     industryMap = psd.getIndustryMap()
     results = pd.merge(results, industryMap, how="left", left_on="industryClass", right_on="std_industry_name")
     results.drop(columns=["std_industry_name"], inplace=True, axis=1)
@@ -44,9 +46,9 @@ def outputIndustryScores():
     areaResults.columns = ["region_name", "overall_score", "scale_score_l1", "growth_score_l1", "quality_score_l1",
                            "stability_score_l1"]
     areaResults.insert(1, "start_time",
-                       datetime.strptime(timeRange["start_time"][0], "%Y-%m-%d %H:%M:%S").strftime("%Y-%m-%d"))
+                       datetime.strptime(str(timeRange["start_time"][0]), "%Y-%m-%d").strftime("%Y-%m-%d"))
     areaResults.insert(2, "end_time",
-                       datetime.strptime(timeRange["end_time"][0], "%Y-%m-%d %H:%M:%S").strftime("%Y-%m-%d"))
+                       datetime.strptime(str(timeRange["end_time"][0]), "%Y-%m-%d").strftime("%Y-%m-%d"))
     areaResults.insert(3, "create_time", time)
 
     return results, areaResults
@@ -61,8 +63,8 @@ def outputSeasonScores():
         columns={"division": "region_name", "industryClass": "std_industry_name", "季度产业规模得分": "scale_score_l1"},
         inplace=True)
     timeRange = psd.getSeasonTimeRange()
-    year = datetime.strptime(timeRange["end_time"][0], "%Y-%m-%d %H:%M:%S").strftime("%Y")
-    quarter = datetime.strptime(timeRange["end_time"][0], "%Y-%m-%d %H:%M:%S").strftime("%m")
+    year = datetime.strptime(str(timeRange["end_time"][0]), "%Y-%m-%d").strftime("%Y")
+    quarter = datetime.strptime(str(timeRange["end_time"][0]), "%Y-%m-%d").strftime("%m")
 
     """
     if quarter in [3, 6, 9, 12]:
@@ -95,7 +97,7 @@ def outputYearScores():
         columns={"division": "region_name", "industryClass": "std_industry_name", "年度产业规模得分": "scale_score_l1"},
         inplace=True)
     timeRange = psd.getTaskTimeRange()
-    year = datetime.strptime(timeRange["end_time"][0], "%Y-%m-%d %H:%M:%S").strftime("%Y")
+    year = datetime.strptime(timeRange["end_time"][0], "%Y-%m-%d").strftime("%Y")
 
     """
     if quarter in [3, 6, 9, 12]:

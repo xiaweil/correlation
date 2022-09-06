@@ -193,8 +193,8 @@ def pushCreativityData():
 # pushMonthData()
 # updateMonthEleData()
 # pushUserInfo()
-pushIndustrialScore()
-
-# pushYearIndustryTrend()
+# pushIndustrialScore()
+# pushIndustryTrend()
+pushYearIndustryTrend()
 
 # pushCreativityData()

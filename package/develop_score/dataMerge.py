@@ -23,7 +23,7 @@ def getIndustrialScore():
                       right_on=['division1', 'industryClass1'])
     print(result)
     result.drop(columns=['division1', 'industryClass1'], inplace=True)
-    result.to_csv("C://Users/yone/Desktop/endResults.csv", index=False)
+    # result.to_csv("C://Users/yone/Desktop/endResults.csv", index=False)
     # print(result)
     # FA计算得分
     print("开始因子分析")

@@ -180,7 +180,7 @@ def dealSeasonElectricity(data=psd.getSeasonElectricity()):
     # monthData = data.groupby(["cons_no", "mr_date"])["dl"].sum()
     monthData = data[["cons_no", "mr_date", "dl"]]
     monthData.set_index(["cons_no", "mr_date"], inplace=True)
-    monthData = monthData.unstack().rename_axis(columns=None).reset_index()
+    monthData = monthData.unstack()['dl'].rename_axis(columns=None).reset_index()
     __columnsName = [f"season{i}" for i in range(1, 4)]
     __columnsEle = __columnsName.copy()
     __columnsName.insert(0, "userId")
@@ -218,7 +218,7 @@ def dealYearElectricity(data=psd.getYearElectricity()):
     # monthData = data.groupby(["cons_no", "mr_date"])["dl"].sum()
     monthData = data[["cons_no", "mr_date", "dl"]]
     monthData.set_index(["cons_no", "mr_date"], inplace=True)
-    monthData = monthData.unstack().rename_axis(columns=None).reset_index()
+    monthData = monthData.unstack()['dl'].rename_axis(columns=None).reset_index()
     __columnsName = [f"year{i}" for i in range(1, 13)]
     __columnsEle = __columnsName.copy()
     __columnsName.insert(0, "userId")
