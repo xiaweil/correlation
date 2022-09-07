@@ -189,12 +189,3 @@ def pushCreativityData():
     data = dsd.concatCreatityType()
     data.to_sql("creativity_type", con=connect.mysql_engine(), if_exists="append", index=False)
 
-
-# pushMonthData()
-# updateMonthEleData()
-# pushUserInfo()
-# pushIndustrialScore()
-# pushIndustryTrend()
-# pushYearIndustryTrend()
-
-# pushCreativityData()

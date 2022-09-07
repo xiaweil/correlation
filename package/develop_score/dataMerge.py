@@ -66,9 +66,9 @@ def getSeasonIndustrialScore():
 
 
 # 获取年度产业规模得分
-def getYearIndustrialScore(data=gid.generateYearInputData()):
+def getYearIndustrialScore():
     # 输入
-    data = data
+    data = gid.generateYearInputData()
     val2019 = psd.getval2019()
     val2017 = psd.getval2017()
     voltage = psd.getVoltageData()

@@ -141,7 +141,8 @@ def modifyUserInfo():
 
 
 # 获取两年的月度数据
-def dealElectricity(data=psd.getMonthElectricity()):
+def dealElectricity():
+    data = psd.getMonthElectricity()
     # monthData = data.groupby(["cons_no", "mr_date"])["dl"].sum()
     monthData = data[["cons_no", "mr_date", "dl"]]
     monthData.set_index(["cons_no", "mr_date"], drop=True, inplace=True)
@@ -177,6 +178,7 @@ def dealElectricity(data=psd.getMonthElectricity()):
 
 # 获取季度电力数据
 def dealSeasonElectricity(data=psd.getSeasonElectricity()):
+
     # monthData = data.groupby(["cons_no", "mr_date"])["dl"].sum()
     monthData = data[["cons_no", "mr_date", "dl"]]
     monthData.set_index(["cons_no", "mr_date"], inplace=True)
@@ -212,9 +214,9 @@ def dealSeasonElectricity(data=psd.getSeasonElectricity()):
     print("电力数据拼接完成")
     return monthData
 
-
 # 获取年度产业数据
 def dealYearElectricity(data=psd.getYearElectricity()):
+
     # monthData = data.groupby(["cons_no", "mr_date"])["dl"].sum()
     monthData = data[["cons_no", "mr_date", "dl"]]
     monthData.set_index(["cons_no", "mr_date"], inplace=True)

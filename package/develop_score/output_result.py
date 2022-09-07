@@ -40,7 +40,8 @@ def outputIndustryScores():
     areaIndustryGrowthScore = areaIndustryGrowth * np.log2(industryCountOfArea) / industryCountOfArea
     areaDevelopQualityScore = areaDevelopQuality * np.log2(industryCountOfArea) / industryCountOfArea
     areaIndustryStabilityScore = areaIndustryStability * np.log2(industryCountOfArea) / industryCountOfArea
-    areaIndustryOverallScore = (areaIndustryScaleScore + areaIndustryGrowthScore + areaDevelopQualityScore + areaIndustryStabilityScore) / 4
+    areaIndustryOverallScore = (
+                                           areaIndustryScaleScore + areaIndustryGrowthScore + areaDevelopQualityScore + areaIndustryStabilityScore) / 4
     areaResults = pd.concat([areaIndustryOverallScore, areaIndustryScaleScore, areaIndustryGrowthScore,
                              areaDevelopQualityScore, areaIndustryStabilityScore], axis=1).reset_index()
     areaResults.columns = ["region_name", "overall_score", "scale_score_l1", "growth_score_l1", "quality_score_l1",
@@ -52,6 +53,7 @@ def outputIndustryScores():
     areaResults.insert(3, "create_time", time)
 
     return results, areaResults
+
 
 # 输出季度产业规模得分
 def outputSeasonScores():
@@ -87,9 +89,12 @@ def outputSeasonScores():
     results = results[columns]
     return results
 
+
 # 输出年度产业规模得分
-def outputYearScores(results = dm.getYearIndustrialScore(), timeRange = psd.getTaskTimeRange()):
-    results = results
+def outputYearScores():
+    results = dm.getYearIndustrialScore()
+    timeRange = psd.getTaskTimeRange()
+
     industryMap = psd.getIndustryMap()
     results = pd.merge(results, industryMap, how="left", left_on="industryClass", right_on="std_industry_name")
     results.drop(columns=["std_industry_name"], inplace=True, axis=1)

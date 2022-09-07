@@ -3,6 +3,7 @@ import pandas as pd
 from package.sql_data_operate import deal_sql_data as dsd
 from package.sql_data_operate import pull_sql_data as psd
 
+
 def getUserInfoTemp():
     data = psd.getUserInfo()
     keyIndustry =psd.getKeyIndustry()
@@ -91,9 +92,10 @@ def generateSeasonInputData():
     return v3InputData
 
 # 获取年度数据输入表
-def generateYearInputData(dataEle = dsd.dealYearElectricity()):
+
+def generateYearInputData():
     # 获取电力数据表
-    dataEle = dataEle
+    dataEle = dsd.dealYearElectricity()
 
     # 获取user_info表
     user_info = getUserInfoTemp()
@@ -105,7 +107,6 @@ def generateYearInputData(dataEle = dsd.dealYearElectricity()):
     user = pd.merge(keyCompany, user_info, how="left", left_on="companyName", right_on="user_name")
     keyCompanyId = user.loc[:, "user_code"]
     keyCompanyId = list(keyCompanyId)
-
     dataEle.loc[dataEle["userId"].isin(keyCompanyId), "isCoreCompany"] = 1
     dataEle.loc[~dataEle["userId"].isin(keyCompanyId), "isCoreCompany"] = 0
     print("是否重点企业拼接完成")
