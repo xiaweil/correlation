@@ -4,5 +4,5 @@
 # @FileName : interface.py
 
 
-from package.sql_data_operate.push_sql_data import pushMonthData
-pushMonthData()
+from package.sql_data_operate import push_sql_data as push
+push.pushMonthData()

@@ -13,12 +13,17 @@ class DBConfig(object):
     数据库配置参数
     """
 
+    # host_mysql = "124.71.156.211"
+    # port_mysql = 3307
+    # user_mysql = "root"
+    # password_mysql = "Csstsari107!"
+    # database_mysql = "shinan_cyjj"
+
     host_mysql = "124.71.156.211"
     port_mysql = 3307
     user_mysql = "root"
     password_mysql = "Csstsari107!"
-    database_mysql = "shinan_cyjj"
-
+    database_mysql = "cyjj_test"
 
     # host_mysql = "localhost"
     # port_mysql = 3306
