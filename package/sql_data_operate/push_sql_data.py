@@ -182,7 +182,6 @@ def pushIndustryTrend():
     data = ore.outputSeasonScores()
     data.to_sql("industry_trend", con=connect.mysql_engine(), if_exists="append", index=False)
 
-
 def pushYearIndustryTrend():
     data = ore.outputYearScores()
     data.to_sql("industry_trend", con=connect.mysql_engine(), if_exists="append", index=False)

@@ -235,6 +235,13 @@ def getKeyEnterprise(session):
     data = pd.DataFrame(result, columns=["company_name", "nature"])
     return data
 
+@operateSqlData
+def getKuDataSimple(session):
+    sql = "select 企业名称, 企业性质 from kudata "
+    result = session.execute(sql)
+    data = pd.DataFrame(result, columns=["company_name", "nature"])
+    return data
+
 # 获取企业库数据
 @operateSqlData
 def getCompanyLibrary(session):
@@ -263,8 +270,8 @@ def getIndustryLibrary(session):
 
 @operateSqlData
 def getTaskTimeRange(session):
-    sql = "select subdate(adddate(last_day(concat(max(mr_date), '-01')), interval 1 day), interval 2 year), " \
-          "max(last_day(concat(mr_date, '-01'))) from montheledata;"
+    sql = "select subdate(adddate(last_day(concat(max(month), '-01')), interval 1 day), interval 2 year), " \
+          "max(last_day(concat(month, '-01'))) from electricity_consumption;"
     result = session.execute(sql)
     data = pd.DataFrame(result, columns=["start_time", "end_time"])
     return data
@@ -272,7 +279,7 @@ def getTaskTimeRange(session):
 
 @operateSqlData
 def getSeasonTimeRange(session):
-    sql = "select max(last_day(concat(mr_date, '-01'))) from montheledata; "
+    sql = "select max(last_day(concat(month, '-01'))) from electricity_consumtion; "
     result = session.execute(sql)
     data = pd.DataFrame(result, columns=["end_time"])
     return data
@@ -308,7 +315,7 @@ def getKeyIndustry(session):
 
 @operateSqlData
 def getCreativityEnterpriseData(session):
-    sql = "select user_name, district_name, type from creativity_type"
+    sql = "select 用户名称, 行政区, 创新模式 from enterprise_data"
     result = session.execute(sql)
     data = pd.DataFrame(result, columns=["company_name", "district", "creativity_mode"])
     return data

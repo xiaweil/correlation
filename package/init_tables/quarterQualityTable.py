@@ -14,14 +14,11 @@ from sqlalchemy.orm import sessionmaker
 from package.sql_data_operate import pull_sql_data as psd
 from package.develop_score.zb_quantity_quality import finalMerge
 
-engine = create_engine("mysql+pymysql://root:Csstsari107!@124.71.156.211:3307/shinan_cyjj?charset=utf8")
+engine = create_engine("mysql+pymysql://root:Csstsari107!@124.71.156.211:3307/cyjj_test?charset=utf8")
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
-startTime = ['2019-01', '2019-04', '2019-07', '2019-10', '2020-01', '2020-04', '2020-07',
-             '2020-10', '2021-01', '2021-04', '2021-07', '2021-10']
-endTime = ['2019-03', '2019-06', '2019-09', '2019-12', '2020-03', '2020-06', '2020-09',
-           '2020-12', '2021-03', '2021-06', '2021-09', '2021-12']
+
 
 def getUserInfoTemp():
     data = psd.getUserInfo()
@@ -33,104 +30,144 @@ def getUserInfoTemp():
     return data[columns]
 
 def getYearData(start_date, end_date):
-    sql = f"select cons_no, mr_date, dl from montheledata where mr_date >= \'{start_date}\' and mr_date<=\'{end_date}\'"
+    sql = f"select user_code, month, consumption from electricity_consumption where month >= \'{start_date}\' and month<=\'{end_date}\'"
     print(sql)
     results = session.execute(sql)
     data = pd.DataFrame(results, columns=["cons_no", "mr_date", "dl"])
     return data
 
-for i in range(len(startTime)):
-    start_date = startTime[i]
-    end_date = endTime[i]
-    timeRange = pd.DataFrame([[start_date, end_date]], columns=["start_time", "end_time"])
-    print(timeRange)
-    data = getYearData(start_date=start_date, end_date=end_date)
-    print(data)
-    dataEle = dealSeasonElectricity(data=data)
-    user_info = getUserInfoTemp()
+def cal():
+    startTime = ['2019-01', '2019-04', '2019-07', '2019-10', '2020-01', '2020-04', '2020-07',
+                 '2020-10', '2021-01', '2021-04', '2021-07', '2021-10']
+    endTime = ['2019-03', '2019-06', '2019-09', '2019-12', '2020-03', '2020-06', '2020-09',
+               '2020-12', '2021-03', '2021-06', '2021-09', '2021-12']
+    for i in range(len(startTime)):
+        start_date = startTime[i]
+        end_date = endTime[i]
+        timeRange = pd.DataFrame([[start_date, end_date]], columns=["start_time", "end_time"])
+        print(timeRange)
+        data = getYearData(start_date=start_date, end_date=end_date)
+        print(data)
 
-    # 获取重点企业库kudata
-    keyCompany = psd.getCompanyLibrary()
+        monthData = data[["cons_no", "mr_date", "dl"]]
+        monthData.set_index(["cons_no", "mr_date"], inplace=True)
+        monthData = monthData.unstack()['dl'].rename_axis(columns=None).reset_index()
+        __columnsName = [f"season{i}" for i in range(1, 4)]
+        __columnsEle = __columnsName.copy()
+        __columnsName.insert(0, "userId")
+        monthData.columns = __columnsName
+        monthData.loc[:, __columnsEle] = monthData.loc[:, __columnsEle].applymap(lambda x: None if x < 0 else x)
 
-    # 拼接user_info和重点企业库，取出重点企业的Id
-    user = pd.merge(keyCompany, user_info, how="left", left_on="companyName", right_on="user_name")
-    keyCompanyId = user.loc[:, "user_code"]
-    keyCompanyId = list(keyCompanyId)
+        # 计算两年用电量总和
+        monthData["sum"] = monthData.loc[:, __columnsEle].sum(axis=1)
+        # 计算两年中用电量最大值
+        monthData["max"] = monthData.loc[:, __columnsEle].max(axis=1)
+        # 筛选用电量为0的数据
+        monthData = monthData[monthData["sum"] != 0]
 
-    dataEle.loc[dataEle["userId"].isin(keyCompanyId), "isCoreCompany"] = 1
-    dataEle.loc[~dataEle["userId"].isin(keyCompanyId), "isCoreCompany"] = 0
-    print("是否重点企业拼接完成")
+        # 滑动窗口筛选连续出现六个月的数据
+        tempEle = monthData.loc[:, __columnsEle]
+        # tempEleBool = tempEle.applymap(lambda x: 1 if x > 0 else 0)
+        # res = tempEleBool.rolling(window=8, min_periods=1, axis=1).sum().max(axis=1)
+        # res = pd.DataFrame(res, columns=["slideMax"])
+        # monthData = pd.concat([monthData, res], axis=1)
+        # monthData = monthData[monthData["slideMax"] >= 6].iloc[:, :-1]
 
-    # 获取division, industryClass, eleType指标
-    partUserInfoColumns = ["user_code", "user_name", "district", "user_type", "std_industry_name", "key_industry_name"]
-    partUserInfo = user_info.loc[:, partUserInfoColumns]
+        # 计算用电量数据非空月份总和
+        period = tempEle.notnull().sum(axis=1)
+        period = pd.DataFrame(period, columns=["period"])
 
-    # 获取keyIndustryClass指标
-    # 获取工商信息
-    # keyIndustryClass = psd.getCommercialInfo()
-    # partV3Data = pd.merge(partUserInfo, keyIndustryClass, how="left", left_on="user_name", right_on="cuser_name")
-    v3InputData = pd.merge(dataEle, partUserInfo, how="left", left_on="userId", right_on="user_code")
-    v3InputData.rename(columns={"std_industry_name": "industryClass", "key_industry_name": "keyIndustryClass",
-                                "user_type": "eleType", "district": "division"}, inplace=True)
-    v3InputData.drop(columns=["user_code", "user_name"], axis=1, inplace=True)
-    columns = ['userId', 'season1', 'season2', 'season3', 'sum',
-               'max', 'division', 'isCoreCompany', 'industryClass', 'eleType',
-               'period', 'mean', 'keyIndustryClass']
-    v3InputData = v3InputData.loc[:, columns]
-    data = v3InputData
+        monthData = pd.concat([monthData, period], axis=1)
+        # 计算用电量均值
+        monthData["mean"] = monthData["sum"] / monthData["period"]
+        print("电力数据拼接完成")
 
-    val2019 = psd.getval2019()
-    val2017 = psd.getval2017()
-    voltage = psd.getVoltageData()
-    industryLibrary = psd.getIndustryLibrary()
-    data = data[data["industryClass"].isin(list(industryLibrary["industryClass"]))]
+        dataEle = monthData
 
-    result1 = finalMerge(data, voltage, val2019, val2017, 2)
-    columns = ["division", "industryClass", "electricity_sum_l3", "electricity_avg_l3", "electricity_max_l3",
-               "electricity_sum_max_l3", "output_sum_l3", "output_proportion_l3", "enterprise_sum_l3",
-               "enterprise_proportion_l3", "proportion_district_l3", "proportion_industry_l3"]
-    result = result1[columns]
+        user_info = getUserInfoTemp()
 
-    # FA计算得分
-    print("开始因子分析")
-    scores = mainVs(result)
-    # 调整分数并计算综合得分
-    print("因子分析完成")
-    afterAdjustScore = adjustScore(scores.iloc[:, 2:])
-    afterAdjustScore.columns = ["季度产业规模得分"]
-    finalScore = pd.concat([scores.iloc[:, :2], afterAdjustScore], axis=1)
+        # 获取重点企业库kudata
+        keyCompany = psd.getCompanyLibrary()
 
-    results = finalScore
-    industryMap = psd.getIndustryMap()
-    results = pd.merge(results, industryMap, how="left", left_on="industryClass", right_on="std_industry_name")
-    results.drop(columns=["std_industry_name"], inplace=True, axis=1)
-    results.rename(
-        columns={"division": "region_name", "industryClass": "std_industry_name", "季度产业规模得分": "scale_score_l1"},
-        inplace=True)
-    print("jgfshfjk")
-    print(results)
-    year = datetime.strptime(str(timeRange["end_time"][0]), "%Y-%m").strftime("%Y")
-    quarter = datetime.strptime(str(timeRange["end_time"][0]), "%Y-%m").strftime("%m")
+        # 拼接user_info和重点企业库，取出重点企业的Id
+        user = pd.merge(keyCompany, user_info, how="left", left_on="companyName", right_on="user_name")
+        keyCompanyId = user.loc[:, "user_code"]
+        keyCompanyId = list(keyCompanyId)
 
-    """
-    if quarter in [3, 6, 9, 12]:
-        results["stat_time"] = f"{year}-Q{int(quarter) / 3}"
+        dataEle.loc[dataEle["userId"].isin(keyCompanyId), "isCoreCompany"] = 1
+        dataEle.loc[~dataEle["userId"].isin(keyCompanyId), "isCoreCompany"] = 0
+        print("是否重点企业拼接完成")
+
+        # 获取division, industryClass, eleType指标
+        partUserInfoColumns = ["user_code", "user_name", "district", "user_type", "std_industry_name", "key_industry_name"]
+        partUserInfo = user_info.loc[:, partUserInfoColumns]
+
+        # 获取keyIndustryClass指标
+        # 获取工商信息
+        # keyIndustryClass = psd.getCommercialInfo()
+        # partV3Data = pd.merge(partUserInfo, keyIndustryClass, how="left", left_on="user_name", right_on="cuser_name")
+        v3InputData = pd.merge(dataEle, partUserInfo, how="left", left_on="userId", right_on="user_code")
+        v3InputData.rename(columns={"std_industry_name": "industryClass", "key_industry_name": "keyIndustryClass",
+                                    "user_type": "eleType", "district": "division"}, inplace=True)
+        v3InputData.drop(columns=["user_code", "user_name"], axis=1, inplace=True)
+        columns = ['userId', 'season1', 'season2', 'season3', 'sum',
+                   'max', 'division', 'isCoreCompany', 'industryClass', 'eleType',
+                   'period', 'mean', 'keyIndustryClass']
+        v3InputData = v3InputData.loc[:, columns]
+        data = v3InputData
+
+        val2019 = psd.getval2019()
+        val2017 = psd.getval2017()
+        voltage = psd.getVoltageData()
+        industryLibrary = psd.getIndustryLibrary()
+        data = data[data["industryClass"].isin(list(industryLibrary["industryClass"]))]
+
+        result1 = finalMerge(data, voltage, val2019, val2017, 2)
+        columns = ["division", "industryClass", "electricity_sum_l3", "electricity_avg_l3", "electricity_max_l3",
+                   "electricity_sum_max_l3", "output_sum_l3", "output_proportion_l3", "enterprise_sum_l3",
+                   "enterprise_proportion_l3", "proportion_district_l3", "proportion_industry_l3"]
+        result = result1[columns]
+
+        # FA计算得分
+        print("开始因子分析")
+        scores = mainVs(result)
+        # 调整分数并计算综合得分
+        print("因子分析完成")
+        afterAdjustScore = adjustScore(scores.iloc[:, 2:])
+        afterAdjustScore.columns = ["季度产业规模得分"]
+        finalScore = pd.concat([scores.iloc[:, :2], afterAdjustScore], axis=1)
+
+        results = finalScore
+        industryMap = psd.getIndustryMap()
+        results = pd.merge(results, industryMap, how="left", left_on="industryClass", right_on="std_industry_name")
+        results.drop(columns=["std_industry_name"], inplace=True, axis=1)
+        results.rename(
+            columns={"division": "region_name", "industryClass": "std_industry_name", "季度产业规模得分": "scale_score_l1"},
+            inplace=True)
+        print("jgfshfjk")
+        print(results)
+        year = datetime.strptime(str(timeRange["end_time"][0]), "%Y-%m").strftime("%Y")
+        quarter = datetime.strptime(str(timeRange["end_time"][0]), "%Y-%m").strftime("%m")
+
+        """
+        if quarter in [3, 6, 9, 12]:
+            results["stat_time"] = f"{year}-Q{int(quarter) / 3}"
+            results["frequency"] = 2
+            time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            results["create_time"] = time
+            columns = ["region_name", "std_industry_id", "stat_time", "scale_score_l1", "frequency", "create_time"]
+            results = results[columns]
+            return results
+        else:
+            print("未到季度更新节点，数据不需要更新！")
+        """
+
+        results["stat_time"] = f"{year}0{int(int(quarter) / 3)}"
         results["frequency"] = 2
         time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         results["create_time"] = time
         columns = ["region_name", "std_industry_id", "stat_time", "scale_score_l1", "frequency", "create_time"]
         results = results[columns]
-        return results
-    else:
-        print("未到季度更新节点，数据不需要更新！")
-    """
+        results.to_sql("industry_trend", con=connect.mysql_engine(), if_exists="append", index=False)
 
-    results["stat_time"] = f"{year}0{int(int(quarter) / 3)}"
-    results["frequency"] = 2
-    time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    results["create_time"] = time
-    columns = ["region_name", "std_industry_id", "stat_time", "scale_score_l1", "frequency", "create_time"]
-    results = results[columns]
-    results.to_sql("industry_trend", con=connect.mysql_engine(), if_exists="append", index=False)
-
-session.close()
+    session.close()
