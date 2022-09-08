@@ -175,7 +175,6 @@ def pushIndustrialScore():
     data.to_sql("evaluation_industrial", con=connect.mysql_engine(), if_exists="append", index=False)
     areaData.to_sql("evaluation_regional", con=connect.mysql_engine(), if_exists="append", index=False)
 
-
 def pushIndustryTrend():
     data = ore.outputSeasonScores()
     data.to_sql("industry_trend", con=connect.mysql_engine(), if_exists="append", index=False)
