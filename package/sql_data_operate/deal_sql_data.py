@@ -4,6 +4,7 @@ from package.sql_data_operate import pull_sql_data as psd
 from datetime import datetime
 import re
 
+
 # 日度数据转月度数据并存入数据库
 def toMonthData(operate):
     if operate == 0:
@@ -16,6 +17,7 @@ def toMonthData(operate):
     time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     monthData['create_time'] = time
     return monthData
+
 
 # 处理数据并转成user_info    -------v2
 def compile(sequence):
@@ -41,7 +43,7 @@ def dealOriginData():
     orgno = psd.getOrgno()
     voltage = psd.getVoltageRef()
     industryInfo = psd.getIndustryInfo()
-    keyEnterprise = psd.getKeyEnterprise()
+    keyEnterprise = psd.getKuDataSimple()
     keyEnterprise.drop_duplicates(subset=["company_name"], keep="first", inplace=True)
     userType = psd.getUsertype()
     position = psd.getRefNamePosition()
@@ -95,6 +97,7 @@ def dealOriginData():
                 inplace=True)
 
     return data
+
 
 # 获取user_info的所有字段，修改并存入数据库 -----v1
 def modifyUserInfo():
@@ -256,31 +259,33 @@ def dealYearElectricity():
 # 拼接成key_enterprise表，但还没有输出
 def concatUserInfoAndKuData():
     data = psd.getUserInfo()
-    keyIndustryData = psd.getKeyIndustry()
+    # keyIndustryData = psd.getKeyIndustry()
     data = data[data["is_core"] == 1]
     kuData = psd.getKuData()
-    results = pd.merge(data, kuData, how="left", left_on="user_name", right_on="company_name")
-    results = pd.merge(results, keyIndustryData, how="left", left_on="key_industry_id", right_on="kiId")
-    columns = ["user_name", "user_code", "key_industry_name", "address_x", "district_x", "nature", "type"]
+    results = pd.merge(kuData, data, how="left", left_on="company_name", right_on="user_name")
+    # results = pd.merge(results, keyIndustryData, how="left", left_on="key_industry_id", right_on="kiId")
+    # columns = ["company_name", "user_code", "key_industry_name", "address_x", "district_x", "nature", "type"]
+    columns = ["company_name", "user_code", "industry", "address_x", "district_x", "nature", "type"]
     results = results[columns]
-    results.rename(columns={"user_name": "company_name", "address_x": "address", "district_x": "district"},
+    results.rename(columns={"address_x": "address", "district_x": "district", "industry": "key_industry_name"},
                    inplace=True)
-    print(results)
-    # return results
-
-
-"""
-def concatCreatityType():
-    data = psd.getUserInfo()
-    creativityEnterpriseData = psd.getCreativityEnterpriseData()
-    results = pd.merge(data, creativityEnterpriseData, how="left", left_on="user_name", right_on="company_name")
-    columns = ["user_code", "district_x", "creativity_mode"]
-    results = results[columns]
-    results.dropna(inplace=True)
-    results.rename(columns={"district_x": "district_name", "creativity_mode": "type"}, inplace=True)
+    # print(results)
     return results
 
-# concatUserInfoAndKuData()
-# concatCreatityType()
-"""
 
+def concatCreatityType():
+    """
+    # data = psd.getUserInfo()
+    creativityEnterpriseData = psd.getCreativityEnterpriseData()
+    # results = pd.merge(data, creativityEnterpriseData, how="left", left_on="user_name", right_on="company_name")
+    # results = pd.merge(creativityEnterpriseData, data, how="left", left_on="company_name", )
+    # columns = ["user_code", "district_x", "creativity_mode"]
+    """
+    results = psd.getCreativityEnterpriseData()
+    columns = ["company_name", "district", "creativity_mode"]
+    results = results[columns]
+    results.dropna(inplace=True)
+    # results.rename(columns={"district_x": "district_name", "creativity_mode": "type"}, inplace=True)
+    results.rename(columns={"company_name": "user_name", "district": "district_name", "creativity_mode": "type"},
+                   inplace=True)
+    return results
