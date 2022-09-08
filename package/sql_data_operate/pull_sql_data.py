@@ -2,7 +2,6 @@
 import pandas as pd
 from package.db_connect.connect import operateSqlData
 from datetime import datetime
-from dateutil.relativedelta import relativedelta
 
 
 # 获取用户电压数据
@@ -13,7 +12,6 @@ def getVoltageData(session):
     result = session.execute(sql)
     voltage = pd.DataFrame(result, columns=["userIdVoltage", "voltageLevel"])
     return voltage
-
 
 # 获取最新的单位产值能耗数据
 # 读取能耗信息表

@@ -15,7 +15,6 @@ def pushMonthData():
     data = dsd.toMonthData(0)
     data.to_sql("electricity_consumption", con=connect.mysql_engine(), if_exists="append", index=False)
 
-
 @operateSqlData
 def updateMonthEleData(session):
     data = dsd.toMonthData(1)
@@ -38,6 +37,7 @@ def updateMonthEleData(session):
 
             session.add(newEle)
             session.commit()
+
 # 保存userInfo到数据库
 @operateSqlData
 def pushUserInfo(session):
