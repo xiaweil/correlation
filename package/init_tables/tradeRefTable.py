@@ -10,7 +10,23 @@ from sqlalchemy import create_engine
 from sqlalchemy.types import DATE,CHAR,VARCHAR
 from package.db_connect import connect
 
-def trade_code_ref(ref_17, ref_02, industry, ref_02_17):
+def trade_code_ref():
+    # 读表
+    engine = connect.mysql_engine()
+
+    #trade_code和trade_name原始表
+    sql_industry = '''
+    SELECT DISTINCT  trade_code as tradecode, trade_name as tradename
+    FROM f_app_l0
+    '''
+    industry = pd.read_sql(sql_industry, engine)
+
+    #映射表
+    ref_17 = pd.read_sql('select * from ref_17', engine)
+    ref_02 = pd.read_sql('select * from ref_02', engine)
+    ref_02_17 = pd.read_sql('select * from ref_02_17', engine)
+    # industry = pd.read_sql('select * from trade_raw', engine)
+
     #拼接02年行业编码
     r1 = industry.merge(ref_02, on = 'tradecode', how = 'left')
     #保留拼接成功部分
@@ -65,37 +81,45 @@ def trade_code_ref(ref_17, ref_02, industry, ref_02_17):
     tradecode_ref_final_s.loc[tradecode_ref_final_s['sector'].isnull(), 'sector'] = None
     tradecode_ref_final_s.loc[tradecode_ref_final_s['std_industry_name'].isnull(), 'std_industry_name'] = None
 
-    return tradecode_ref_final_s
-
-if __name__ == '__main__':
-    # 读表
-    engine = connect.mysql_engine()
-
-    #trade_code和trade_name原始表
-    sql_industry = '''
-    SELECT DISTINCT  trade_code as tradecode, trade_name as tradename
-    FROM f_app_l0
-    '''
-    industry = pd.read_sql(sql_industry, engine)
-
-    #映射表
-    ref_17 = pd.read_sql('select * from ref_17', engine)
-    ref_02 = pd.read_sql('select * from ref_02', engine)
-    ref_02_17 = pd.read_sql('select * from ref_02_17', engine)
-    # industry = pd.read_sql('select * from trade_raw', engine)
-
-    # 建立tradecode映射表
-    result = trade_code_ref(ref_17, ref_02, industry, ref_02_17)
-
     # 写表
-    # 清空数据表
-    con, cursor = connect.mysql_con()
+    # # 清空数据表
+    # con, cursor = connect.mysql_con()
     # try:
     #     cursor.execute('TRUNCATE table tradecode_ref')
     # except Exception as err:
     #     print(err)
-    result.to_sql('tradecode_ref', con=engine, index=False, chunksize=1000, if_exists='append')
+    tradecode_ref_final_s.to_sql('tradecode_ref', con=engine, index=False, chunksize=1000, if_exists='append')
     engine.dispose()
+
+# if __name__ == '__main__':
+#     # 读表
+#     engine = connect.mysql_engine()
+#
+#     #trade_code和trade_name原始表
+#     sql_industry = '''
+#     SELECT DISTINCT  trade_code as tradecode, trade_name as tradename
+#     FROM f_app_l0
+#     '''
+#     industry = pd.read_sql(sql_industry, engine)
+#
+#     #映射表
+#     ref_17 = pd.read_sql('select * from ref_17', engine)
+#     ref_02 = pd.read_sql('select * from ref_02', engine)
+#     ref_02_17 = pd.read_sql('select * from ref_02_17', engine)
+#     # industry = pd.read_sql('select * from trade_raw', engine)
+#
+#     # 建立tradecode映射表
+#     result = trade_code_ref(ref_17, ref_02, industry, ref_02_17)
+#
+#     # 写表
+#     # 清空数据表
+#     # con, cursor = connect.mysql_con()
+#     # try:
+#     #     cursor.execute('TRUNCATE table tradecode_ref')
+#     # except Exception as err:
+#     #     print(err)
+#     result.to_sql('tradecode_ref', con=engine, index=False, chunksize=1000, if_exists='append')
+#     engine.dispose()
 
 
 
