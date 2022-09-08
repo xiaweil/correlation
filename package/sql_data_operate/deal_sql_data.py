@@ -254,19 +254,22 @@ def dealYearElectricity(data=psd.getYearElectricity()):
     return monthData
 
 
-"""
 # 拼接成key_enterprise表，但还没有输出
 def concatUserInfoAndKuData():
     data = psd.getUserInfo()
     keyIndustryData = psd.getKeyIndustry()
     data = data[data["is_core"] == 1]
-    kuData = psd.getKeyEnterpriseLibrary()
+    kuData = psd.getKuData()
     results = pd.merge(data, kuData, how="left", left_on="user_name", right_on="company_name")
     results = pd.merge(results, keyIndustryData, how="left", left_on="key_industry_id", right_on="kiId")
     columns = ["user_name", "user_code", "key_industry_name", "address_x", "district_x", "nature", "type"]
     results = results[columns]
+    results.rename(columns={"user_name": "company_name", "address_x": "address", "district_x": "district"},
+                   inplace=True)
     print(results)
-"""
+    # return results
+
+
 """
 def concatCreatityType():
     data = psd.getUserInfo()
@@ -281,3 +284,4 @@ def concatCreatityType():
 # concatUserInfoAndKuData()
 # concatCreatityType()
 """
+concatUserInfoAndKuData()

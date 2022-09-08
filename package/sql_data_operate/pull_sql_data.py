@@ -294,6 +294,12 @@ def getKeyEnterpriseLibrary(session):
     data = pd.DataFrame(result, columns=["company_name", "industry", "address", "district", "nature", "type"])
     return data
 
+@operateSqlData
+def getKuData(session):
+    sql = "select 企业名称, 行业, 企业地址, 办公区域, 企业性质, 企业类型 from kudata"
+    result = session.execute(sql)
+    data = pd.DataFrame(result, columns=["company_name", "industry", "address", "district", "nature", "type"])
+    return data
 
 @operateSqlData
 def getKeyIndustry(session):

@@ -184,6 +184,9 @@ def pushYearIndustryTrend():
     data = ore.outputYearScores()
     data.to_sql("industry_trend", con=connect.mysql_engine(), if_exists="append", index=False)
 
+def pushKeyEnterprise():
+    data = dsd.concatUserInfoAndKuData()
+    data.to_sql("key_enterprise", con=connect.mysql_engine(), if_exists="append", index=False)
 
 def pushCreativityData():
     data = dsd.concatCreatityType()
