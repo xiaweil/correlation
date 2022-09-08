@@ -4,21 +4,30 @@ from package.sql_data_operate import deal_sql_data as dsd
 from package.sql_data_operate import pull_sql_data as psd
 
 
+def getUserInfoTemp():
+    data = psd.getUserInfo()
+    keyIndustry =psd.getKeyIndustry()
+    data = pd.merge(data, keyIndustry, how="left", left_on="key_industry_id", right_on="kiId")
+    columns = ["user_code", "user_name", "sector", "address", "center", "voltage_level", "user_type", "district",
+               "lon", "lat", "std_industry_name", "std_industry_id", "company_nature", "is_core", "key_industry_name",
+               "key_industry_id"]
+    return data[columns]
+
 def generateInputData():
     # 获取电力数据表
     dataEle = dsd.dealElectricity()
 
     # 获取user_info表
-    user_info = psd.getUserInfoTemp()
+    user_info = getUserInfoTemp()
 
-    # 获取重点企业库kudata
+    # 获取重点企业库key_enterprise
     keyCompany = psd.getCompanyLibrary()
 
     # 拼接user_info和重点企业库，取出重点企业的Id
     user = pd.merge(keyCompany, user_info, how="left", left_on="companyName", right_on="user_name")
     keyCompanyId = user.loc[:, "user_code"]
     keyCompanyId = list(keyCompanyId)
-    print(keyCompanyId)
+    # print(keyCompanyId)
 
     dataEle.loc[dataEle["userId"].isin(keyCompanyId), "isCoreCompany"] = 1
     dataEle.loc[~dataEle["userId"].isin(keyCompanyId), "isCoreCompany"] = 0
@@ -50,7 +59,7 @@ def generateSeasonInputData():
     # 获取电力数据表
     dataEle = dsd.dealSeasonElectricity()
     # 获取user_info表
-    user_info = psd.getUserInfoTemp()
+    user_info = getUserInfoTemp()
 
     # 获取重点企业库kudata
     keyCompany = psd.getCompanyLibrary()
@@ -83,12 +92,13 @@ def generateSeasonInputData():
     return v3InputData
 
 # 获取年度数据输入表
+
 def generateYearInputData():
     # 获取电力数据表
     dataEle = dsd.dealYearElectricity()
 
     # 获取user_info表
-    user_info = psd.getUserInfoTemp()
+    user_info = getUserInfoTemp()
 
     # 获取重点企业库kudata
     keyCompany = psd.getCompanyLibrary()
@@ -97,7 +107,6 @@ def generateYearInputData():
     user = pd.merge(keyCompany, user_info, how="left", left_on="companyName", right_on="user_name")
     keyCompanyId = user.loc[:, "user_code"]
     keyCompanyId = list(keyCompanyId)
-
     dataEle.loc[dataEle["userId"].isin(keyCompanyId), "isCoreCompany"] = 1
     dataEle.loc[~dataEle["userId"].isin(keyCompanyId), "isCoreCompany"] = 0
     print("是否重点企业拼接完成")
