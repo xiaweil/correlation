@@ -2,7 +2,6 @@
 import pandas as pd
 from package.db_connect.connect import operateSqlData
 from datetime import datetime
-from dateutil.relativedelta import relativedelta
 
 
 # 获取用户电压数据
@@ -13,7 +12,6 @@ def getVoltageData(session):
     result = session.execute(sql)
     voltage = pd.DataFrame(result, columns=["userIdVoltage", "voltageLevel"])
     return voltage
-
 
 # 获取最新的单位产值能耗数据
 # 读取能耗信息表
@@ -294,6 +292,12 @@ def getKeyEnterpriseLibrary(session):
     data = pd.DataFrame(result, columns=["company_name", "industry", "address", "district", "nature", "type"])
     return data
 
+@operateSqlData
+def getKuData(session):
+    sql = "select 企业名称, 行业, 企业地址, 办公区域, 企业性质, 企业类型 from kudata"
+    result = session.execute(sql)
+    data = pd.DataFrame(result, columns=["company_name", "industry", "address", "district", "nature", "type"])
+    return data
 
 @operateSqlData
 def getKeyIndustry(session):
