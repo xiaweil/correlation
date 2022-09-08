@@ -4,7 +4,7 @@
 # @FileName : base.py
 
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, INT, VARCHAR, INTEGER
+from sqlalchemy import Column, INT, VARCHAR, DATETIME
 from sqlalchemy.dialects.mysql import DOUBLE
 Base = declarative_base()
 
@@ -32,10 +32,11 @@ class User(Base):
     build_date = Column(VARCHAR(255))
 
 class Electricity(Base):
-    __tablename__ = "montheledata"
+    __tablename__ = "electricity_consumption"
     id = Column(INT, primary_key=True)
-    cons_no = Column(VARCHAR(255))
-    cons_name = Column(VARCHAR(255))
-    mr_date = Column(VARCHAR(255))
-    dl = Column(DOUBLE(10, 2))
+    user_code = Column(VARCHAR(255))
+    user_name = Column(VARCHAR(255))
+    month = Column(VARCHAR(255))
+    consumption = Column(DOUBLE(10, 2))
+    create_time = Column(DATETIME)
 

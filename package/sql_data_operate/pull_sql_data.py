@@ -53,7 +53,7 @@ def dayData2monthData(session):
 @operateSqlData
 def updateMonthData(session):
     sql = "select cons_no, cons_name, mr_date, dl from gdc_kie_deq_info_l0 where mr_date > " \
-          "(select subdate(str_to_date(concat(max(mr_date),'-01'), '%Y-%m-%d'), interval 2 month) from montheledata) and mr_date<= " \
+          "(select subdate(str_to_date(concat(max(month),'-01'), '%Y-%m-%d'), interval 2 month) from electricity_consumption) and mr_date<= " \
           "(select if(day(b.latest_day)>=25, b.latest_day, last_month) from " \
           "(select last_day(subdate(max(mr_date), interval 1 month)) as last_month, max(mr_date) as latest_day from gdc_kie_deq_info_l0) b);"
     result = session.execute(sql)
@@ -64,7 +64,7 @@ def updateMonthData(session):
 
 @operateSqlData
 def getMonthDate(session):
-    sql = "select max(mr_date) from montheledata"
+    sql = "select max(month) from electricity_consumption"
     result = session.execute(sql)
     return result.all()[0][0]
 
@@ -80,8 +80,8 @@ def getMonthElectricity(session):
           "(select last_day(subdate(max(mr_date), interval 1 month)) as last_month, max(mr_date) as latest_day from gdc_kie_deq_info_l0) b)"
     """
 
-    sql = "select cons_no, cons_name, mr_date, dl from montheledata where mr_date >" \
-          "(select subdate(max(concat(mr_date,  '-01')), interval 2 year) from montheledata)"
+    sql = "select user_code, user_name, month, consumption from electricity_consumption where month >" \
+          "(select subdate(max(concat(month,  '-01')), interval 2 year) from electricity_consumption)"
     result = session.execute(sql)
     data = pd.DataFrame(result, columns=["cons_no", "cons_name", "mr_date", "dl"])
 
@@ -101,8 +101,8 @@ def getSeasonElectricity(session):
           "(select last_day(subdate(max(mr_date), interval 1 month)) as last_month, max(mr_date) as latest_day from gdc_kie_deq_info_l0) a)"
     """
 
-    sql = "select cons_no, cons_name, mr_date, dl from montheledata where mr_date >" \
-          "(select subdate(max(concat(mr_date, '-01')), interval 3 month) from montheledata)"
+    sql = "select user_code, user_name, month, consumption from electricity_consumption where month >" \
+          "(select subdate(max(concat(month, '-01')), interval 3 month) from electricity_consumption)"
     result = session.execute(sql)
     data = pd.DataFrame(result, columns=["cons_no", "cons_name", "mr_date", "dl"])
 
@@ -122,8 +122,8 @@ def getYearElectricity(session):
           "(select last_day(subdate(max(mr_date), interval 1 month)) as last_month, max(mr_date) as latest_day from gdc_kie_deq_info_l0) a) "
     """
 
-    sql = "select cons_no, cons_name, mr_date, dl from montheledata where mr_date >" \
-          "(select subdate(max(concat(mr_date, '-01')), interval 1 year) from montheledata)"
+    sql = "select user_code, user_name, month, consumption from electricity_consumption where month >" \
+          "(select subdate(max(concat(month, '-01')), interval 1 year) from electricity_consumption)"
     result = session.execute(sql)
     data = pd.DataFrame(result, columns=["cons_no", "cons_name", "mr_date", "dl"])
 

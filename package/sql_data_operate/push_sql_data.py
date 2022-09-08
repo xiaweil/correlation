@@ -13,7 +13,7 @@ from sqlalchemy import and_
 # 第一次l0表格全入
 def pushMonthData():
     data = dsd.toMonthData(0)
-    data.to_sql("montheledata", con=connect.mysql_engine(), if_exists="append", index=False)
+    data.to_sql("electricity_consumption", con=connect.mysql_engine(), if_exists="append", index=False)
 
 
 @operateSqlData
@@ -22,21 +22,22 @@ def updateMonthEleData(session):
     latestDate = psd.getMonthDate()
     for i in range(data.shape[0]):
         if data.iloc[i, 2] <= latestDate:
-            electricity = session.query(Electricity).filter(and_(Electricity.cons_no == data.iloc[i, 0],
-                                                                 Electricity.cons_name == data.iloc[i, 1],
-                                                                 Electricity.mr_date == data.iloc[i, 2])).first()
+            electricity = session.query(Electricity).filter(and_(Electricity.user_code == data.iloc[i, 0],
+                                                                 Electricity.user_name == data.iloc[i, 1],
+                                                                 Electricity.month == data.iloc[i, 2])).first()
             if pd.isnull(data.iloc[i,3]) == False:
-                electricity.dl = data.iloc[i, 3]
+                electricity.consumption = data.iloc[i, 3]
+                electricity.create_time = data.iloc[i, 4]
             else:
-                electricity.dl = None
+                electricity.consumption = None
+                electricity.create_time = data.iloc[i, 4]
             session.commit()
         else:
-            newEle = Electricity(cons_no=data.iloc[i, 0], cons_name=data.iloc[i, 1], mr_date=data.iloc[i, 2],
-                                 dl=data.iloc[i, 3])
+            newEle = Electricity(user_code=data.iloc[i, 0], user_name=data.iloc[i, 1], month=data.iloc[i, 2],
+                                 consumption=data.iloc[i, 3], create_time=data.iloc[i, 4])
+
             session.add(newEle)
             session.commit()
-
-
 # 保存userInfo到数据库
 @operateSqlData
 def pushUserInfo(session):
@@ -188,4 +189,3 @@ def pushYearIndustryTrend():
 def pushCreativityData():
     data = dsd.concatCreatityType()
     data.to_sql("creativity_type", con=connect.mysql_engine(), if_exists="append", index=False)
-

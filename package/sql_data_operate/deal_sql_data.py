@@ -1,6 +1,7 @@
 # coding:utf8
 import pandas as pd
 from package.sql_data_operate import pull_sql_data as psd
+from datetime import datetime
 import re
 
 
@@ -11,6 +12,10 @@ def toMonthData(operate):
     elif operate == 1:
         data = psd.updateMonthData()
     monthData = data.groupby(["cons_no", "cons_name", "mr_date"], as_index=False)["dl"].sum()
+    monthData.rename(columns={"cons_no": "user_code", "cons_name": "user_name", "mr_date": "month",
+                              "dl": "consumption"}, inplace=True)
+    time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    monthData['create_time'] = time
     return monthData
 
 
@@ -178,7 +183,6 @@ def dealElectricity():
 
 # 获取季度电力数据
 def dealSeasonElectricity(data=psd.getSeasonElectricity()):
-
     # monthData = data.groupby(["cons_no", "mr_date"])["dl"].sum()
     monthData = data[["cons_no", "mr_date", "dl"]]
     monthData.set_index(["cons_no", "mr_date"], inplace=True)
@@ -214,9 +218,9 @@ def dealSeasonElectricity(data=psd.getSeasonElectricity()):
     print("电力数据拼接完成")
     return monthData
 
+
 # 获取年度产业数据
 def dealYearElectricity(data=psd.getYearElectricity()):
-
     # monthData = data.groupby(["cons_no", "mr_date"])["dl"].sum()
     monthData = data[["cons_no", "mr_date", "dl"]]
     monthData.set_index(["cons_no", "mr_date"], inplace=True)
