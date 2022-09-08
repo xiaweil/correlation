@@ -46,11 +46,15 @@ def calIndustryScaleData(data, columns):
     results.drop("industry", inplace=True, axis=1)
 
     #计算相同产业企业总数
-    sameIndustryTotal = totalCompany.groupby("hydl", as_index=False)['companyTotal'].sum().rename(
-        columns={"companyTotal": "industryCompany"})
-    results = pd.merge(results, sameIndustryTotal, how="left", left_on="industryClass",
-                       right_on="hydl")
-    results.drop("hydl", inplace=True, axis=1)
+    """
+    # sameIndustryTotal = totalCompany.groupby("hydl", as_index=False)['companyTotal'].sum().rename(
+    #     columns={"companyTotal": "industryCompany"})
+    """
+
+    sameIndustryTotal = totalCompany.rename(columns={"companyTotal": "industryCompany"})
+    results = pd.merge(results, sameIndustryTotal, how="left", left_on=["division", "industryClass"],
+                       right_on=["xzqh", "hydl"])
+    results.drop(columns=["xzqh","hydl"], inplace=True, axis=1)
     print("产业规模计算完成")
     return results
 
@@ -212,7 +216,7 @@ def finalMerge(data, voltage, val2019, val2017, choice=1):
     results["large_enterprise_proportion_l3"] = results["large_enterprise_sum_l3"] / results["companyTotal"]
     results["large_electricity_proportion_l3"] = results["largeElectricity"] / results["sum"]
     results["high_consumption_proportion_l3"] = results["high_consumption_sum_l3"] / results["companyTotal"]
-    results["highElectricity_proportion_l3"] = results["highElectricity"] / results["sum"]
+    results["high_electricity_proportion_l3"] = results["highElectricity"] / results["sum"]
     results["head_voltage_proportion_l3"] = results["head_voltage_sum_l3"] / results["companyTotal"]
     results["head_electricity_proportion_l3"] = results["headElectricity"] / results["sum"]
     results["per_output_growth_l3"] = results["electricity_per_output_2019"] / results[
@@ -242,7 +246,7 @@ def finalMerge(data, voltage, val2019, val2017, choice=1):
                "key_enterprise_sum_l3", "key_enterprise_proportion_l3", "key_electricity_proportion_l3",
                "core_industry_sum_l3", "core_industry_proportion_l3", "core_electricity_proportion_l3",
                "large_enterprise_sum_l3", "large_enterprise_proportion_l3", "large_electricity_proportion_l3",
-               "high_consumption_sum_l3", "high_consumption_proportion_l3", "highElectricity_proportion_l3",
+               "high_consumption_sum_l3", "high_consumption_proportion_l3", "high_electricity_proportion_l3",
                "head_voltage_sum_l3", "head_voltage_proportion_l3", "head_electricity_proportion_l3",
                "electricity_per_output_l3", "per_output_growth_l3"]
     inputData = results[columns]
