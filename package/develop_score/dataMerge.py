@@ -6,6 +6,7 @@ from package.develop_score.factorAnalysisApi import mainV2, mainVs
 from package.develop_score.scoreAdjust import adjustScore
 from package.data_preprocess import get_input_data as gid
 from package.sql_data_operate import pull_sql_data as psd
+from package.index_detail.base_index_convert import index_convert
 
 def getIndustrialScore():
     # 输入
@@ -24,6 +25,11 @@ def getIndustrialScore():
     print(result)
     result.drop(columns=['division1', 'industryClass1'], inplace=True)
     # result.to_csv("C://Users/yone/Desktop/endResults.csv", index=False)
+
+    # 转置并输出基础指标表
+    index_convert(result)
+    print("基础指标输出完成")
+
     # print(result)
     # FA计算得分
     print("开始因子分析")
